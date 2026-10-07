@@ -1,0 +1,19 @@
+{
+  "name": "webOS IPTV Community Repository",
+  "packages": [
+    {
+      "id": "com.webos.iptv.pro",
+      "version": "1.0.0",
+      "type": "web",
+      "title": "IPTV Player Pro",
+      "appDescription": "High-performance, production-ready IPTV player for LG webOS TVs (webOS 4.0 through webOS 26). Features 10-foot remote navigation, native 4K HDR10/Dolby Vision pipeline, EPG, Xtream Codes, Live DVR, and LAN companion.",
+      "iconUri": "icon.png",
+      "manifestUrl": "https://raw.githubusercontent.com/webos-iptv/repo/main/apps.json",
+      "ipkUrl": "com.webos.iptv.pro_1.0.0_all.ipk",
+      "sourceUrl": "https://github.com/webos-iptv/webos-iptv-player",
+      "rootRequired": false,
+      "category": "Media",
+      "supportUrl": "https://github.com/webos-iptv/webos-iptv-player/issues"
+    }
+  ]
+}

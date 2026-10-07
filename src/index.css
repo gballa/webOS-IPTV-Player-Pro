@@ -1,0 +1,248 @@
+@import "tailwindcss";
+
+:root {
+  /* Dynamic System-Wide Accent System */
+  --tv-accent: #00d2ff;
+  --tv-accent-rgb: 0, 210, 255;
+  --tv-accent-glow: rgba(0, 210, 255, 0.45);
+  --tv-accent-subtle: rgba(0, 210, 255, 0.14);
+  --tv-accent-border: rgba(0, 210, 255, 0.38);
+  --tv-accent-gradient: linear-gradient(135deg, #00d2ff, #0284c7);
+
+  /* Dark Mode (Default: OLED pure / deep charcoal) */
+  --tv-bg-primary: #0a0a0e;
+  --tv-bg-surface: #121218;
+  --tv-bg-elevated: #1a1a24;
+  --tv-bg-glass: rgba(18, 18, 24, 0.88);
+  --tv-border: rgba(255, 255, 255, 0.10);
+  --tv-border-hover: rgba(255, 255, 255, 0.22);
+  --tv-text-primary: #ffffff;
+  --tv-text-secondary: #9ca3af;
+  --tv-text-muted: #6b7280;
+
+  --tv-font-scale: 1;
+  --tv-density-pad: 14px;
+  --tv-density-gap: 12px;
+  --tv-item-height: 74px;
+}
+
+/* System-Wide Accent Color Presets */
+[data-accent="teal"] {
+  --tv-accent: #00d2ff;
+  --tv-accent-rgb: 0, 210, 255;
+  --tv-accent-glow: rgba(0, 210, 255, 0.45);
+  --tv-accent-subtle: rgba(0, 210, 255, 0.14);
+  --tv-accent-border: rgba(0, 210, 255, 0.38);
+  --tv-accent-gradient: linear-gradient(135deg, #00d2ff, #0284c7);
+}
+
+[data-accent="emerald"] {
+  --tv-accent: #10b981;
+  --tv-accent-rgb: 16, 185, 129;
+  --tv-accent-glow: rgba(16, 185, 129, 0.45);
+  --tv-accent-subtle: rgba(16, 185, 129, 0.14);
+  --tv-accent-border: rgba(16, 185, 129, 0.38);
+  --tv-accent-gradient: linear-gradient(135deg, #10b981, #059669);
+}
+
+[data-accent="blue"] {
+  --tv-accent: #3b82f6;
+  --tv-accent-rgb: 59, 130, 246;
+  --tv-accent-glow: rgba(59, 130, 246, 0.45);
+  --tv-accent-subtle: rgba(59, 130, 246, 0.14);
+  --tv-accent-border: rgba(59, 130, 246, 0.38);
+  --tv-accent-gradient: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+[data-accent="purple"] {
+  --tv-accent: #a855f7;
+  --tv-accent-rgb: 168, 85, 247;
+  --tv-accent-glow: rgba(168, 85, 247, 0.45);
+  --tv-accent-subtle: rgba(168, 85, 247, 0.14);
+  --tv-accent-border: rgba(168, 85, 247, 0.38);
+  --tv-accent-gradient: linear-gradient(135deg, #a855f7, #7c3aed);
+}
+
+[data-accent="gold"] {
+  --tv-accent: #f59e0b;
+  --tv-accent-rgb: 245, 158, 11;
+  --tv-accent-glow: rgba(245, 158, 11, 0.45);
+  --tv-accent-subtle: rgba(245, 158, 11, 0.14);
+  --tv-accent-border: rgba(245, 158, 11, 0.38);
+  --tv-accent-gradient: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+[data-accent="ruby"] {
+  --tv-accent: #ef4444;
+  --tv-accent-rgb: 239, 68, 68;
+  --tv-accent-glow: rgba(239, 68, 68, 0.45);
+  --tv-accent-subtle: rgba(239, 68, 68, 0.14);
+  --tv-accent-border: rgba(239, 68, 68, 0.38);
+  --tv-accent-gradient: linear-gradient(135deg, #ef4444, #b91c1c);
+}
+
+[data-accent="pink"] {
+  --tv-accent: #ec4899;
+  --tv-accent-rgb: 236, 72, 153;
+  --tv-accent-glow: rgba(236, 72, 153, 0.45);
+  --tv-accent-subtle: rgba(236, 72, 153, 0.14);
+  --tv-accent-border: rgba(236, 72, 153, 0.38);
+  --tv-accent-gradient: linear-gradient(135deg, #ec4899, #be185d);
+}
+
+[data-accent="coral"] {
+  --tv-accent: #f97316;
+  --tv-accent-rgb: 249, 115, 22;
+  --tv-accent-glow: rgba(249, 115, 22, 0.45);
+  --tv-accent-subtle: rgba(249, 115, 22, 0.14);
+  --tv-accent-border: rgba(249, 115, 22, 0.38);
+  --tv-accent-gradient: linear-gradient(135deg, #f97316, #c2410c);
+}
+
+/* Light Theme Mode */
+[data-theme="light"] {
+  --tv-bg-primary: #eef1f5;
+  --tv-bg-surface: #ffffff;
+  --tv-bg-elevated: #f8fafc;
+  --tv-bg-glass: rgba(255, 255, 255, 0.92);
+  --tv-border: rgba(0, 0, 0, 0.12);
+  --tv-border-hover: rgba(0, 0, 0, 0.25);
+  --tv-text-primary: #0f172a;
+  --tv-text-secondary: #475569;
+  --tv-text-muted: #64748b;
+}
+
+/* UI Density Modes */
+[data-density="compact"] {
+  --tv-density-pad: 8px;
+  --tv-density-gap: 6px;
+  --tv-item-height: 60px;
+}
+
+[data-density="comfortable"] {
+  --tv-density-pad: 14px;
+  --tv-density-gap: 12px;
+  --tv-item-height: 74px;
+}
+
+/* Global 10-Foot Living Room TV Shell */
+body {
+  background-color: var(--tv-bg-primary);
+  color: var(--tv-text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: calc(16px * var(--tv-font-scale));
+  user-select: none;
+  -webkit-user-select: none;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  letter-spacing: -0.01em;
+}
+
+/* Fixed Teal High-Contrast Animated Focus Rings */
+.tv-focusable {
+  outline: none;
+  transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 160ms ease, border-color 160ms ease, background-color 160ms ease;
+  position: relative;
+}
+
+.tv-focusable:focus-visible,
+.tv-focusable.is-focused,
+.tv-focusable:focus {
+  outline: none !important;
+  border-color: var(--tv-accent) !important;
+  box-shadow: 0 0 0 3px var(--tv-accent), 0 10px 28px var(--tv-accent-glow) !important;
+  transform: scale(1.035);
+  z-index: 30;
+}
+
+.tv-card-focus {
+  outline: none;
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 180ms ease, border-color 180ms ease;
+  position: relative;
+}
+
+.tv-card-focus:focus-visible,
+.tv-card-focus.is-focused,
+.tv-card-focus:focus,
+.tv-card-focus:hover {
+  outline: none !important;
+  border-color: var(--tv-accent) !important;
+  box-shadow: 0 0 0 3.5px var(--tv-accent), 0 12px 36px var(--tv-accent-glow) !important;
+  transform: translateY(-5px) scale(1.04);
+  z-index: 35;
+}
+
+/* Custom scrollbars for TV */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--tv-accent);
+}
+
+/* TV Video overlay container */
+video::-webkit-media-controls {
+  display: none !important;
+}
+
+.text-shadow-tv {
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95), 0 0 3px rgba(0, 0, 0, 0.9);
+}
+
+/* Dynamic System-Wide Accent Helpers */
+.tv-accent-bg {
+  background-color: var(--tv-accent) !important;
+  color: #000000 !important;
+}
+
+.tv-accent-bg:hover {
+  filter: brightness(1.08);
+}
+
+.tv-accent-text {
+  color: var(--tv-accent) !important;
+}
+
+.tv-accent-border {
+  border-color: var(--tv-accent) !important;
+}
+
+.tv-accent-subtle-bg {
+  background-color: var(--tv-accent-subtle) !important;
+}
+
+.tv-accent-badge {
+  background-color: var(--tv-accent-subtle) !important;
+  color: var(--tv-accent) !important;
+  border: 1px solid var(--tv-accent-border) !important;
+}
+
+.tv-accent-pill-active {
+  background-color: var(--tv-accent) !important;
+  color: #000000 !important;
+  box-shadow: 0 4px 16px var(--tv-accent-glow) !important;
+}
+
+.tv-accent-glow {
+  box-shadow: 0 0 24px var(--tv-accent-glow) !important;
+}
+
+.tv-accent-fill {
+  fill: var(--tv-accent) !important;
+}
+
+.tv-accent-gradient-bg {
+  background: var(--tv-accent-gradient, linear-gradient(135deg, var(--tv-accent), #000000)) !important;
+}
+

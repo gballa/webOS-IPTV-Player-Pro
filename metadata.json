@@ -1,0 +1,6 @@
+{
+  "name": "webOS IPTV Player Pro",
+  "description": "Production-ready, high-performance IPTV player for LG webOS TVs featuring 10-foot spatial navigation, native 4K/HDR engine, EPG, Xtream Codes, and Live DVR.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
