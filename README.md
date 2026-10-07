@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![webOS IPTV Player Pro Banner](public/icon.svg)
+<img src="./public/logo.svg" alt="webOS IPTV Player Pro Banner" width="100%" style="max-width: 980px;" />
 
 [![Platform](https://img.shields.io/badge/Platform-LG%20webOS%204.0%20--%2026%2B-a50034.svg?style=for-the-badge&logo=lg)](https://www.webosose.org/)
 [![React](https://img.shields.io/badge/React-19.0-61dafb.svg?style=for-the-badge&logo=react)](https://react.dev/)
