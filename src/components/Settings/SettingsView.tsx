@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { AppSettings, PlaylistSource, Channel, VodItem } from '../../types/iptv';
+import { AppSettings, PlaylistSource, Channel, VodItem, Program } from '../../types/iptv';
 import { StorageService, ACCENT_OPTIONS } from '../../services/StorageService';
 import { LanCompanionService } from '../../services/LanCompanionService';
 import { PlaylistParser } from '../../services/PlaylistParser';
 import { XtreamService } from '../../services/XtreamService';
 import { StreamingPlaylistParser, StreamingParseProgress } from '../../services/StreamingPlaylistParser';
 import { IndexedDbService } from '../../services/IndexedDbService';
+import { CacheManagerService, CacheSettings, CacheMetrics } from '../../services/CacheManagerService';
 import {
   Sliders,
   Palette,
@@ -39,6 +40,9 @@ import {
   ShieldAlert,
   Unlock,
   AlertTriangle,
+  Database,
+  Layers,
+  Image,
 } from 'lucide-react';
 
 interface SettingsViewProps {
@@ -56,6 +60,8 @@ interface SettingsViewProps {
   sleepTimerRemainingSec?: number | null;
   onSetSleepTimer?: (minutes: number) => void;
   onCancelSleepTimer?: () => void;
+  programs?: Program[];
+  onUpdatePrograms?: (updated: Program[]) => void;
 }
 
 const BUFFER_PRESETS = [
@@ -130,6 +136,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   sleepTimerRemainingSec,
   onSetSleepTimer,
   onCancelSleepTimer,
+  programs,
+  onUpdatePrograms,
 }) => {
   const [activeSection, setActiveSection] = useState<
     'sources' | 'playback' | 'theme' | 'lan' | 'parental' | 'database' | 'about'
@@ -158,9 +166,22 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     seriesCount: number;
   } | null>(null);
 
+  // Cache Manager state for periodic EPG & image cleanup
+  const [cacheSettings, setCacheSettings] = useState<CacheSettings>(() => CacheManagerService.getSettings());
+  const [cacheMetrics, setCacheMetrics] = useState<CacheMetrics>(() => CacheManagerService.getMetrics());
+  const [isCleaningCache, setIsCleaningCache] = useState(false);
+  const [cacheCleanNotice, setCacheCleanNotice] = useState<string | null>(null);
+
   useEffect(() => {
     IndexedDbService.getStats().then(setDbStats);
   }, [channels.length]);
+
+  useEffect(() => {
+    const unsub = CacheManagerService.subscribeMetrics((metrics) => {
+      setCacheMetrics(metrics);
+    });
+    return unsub;
+  }, []);
 
   // Xtream Form states
   const [xtreamHost, setXtreamHost] = useState('');
@@ -488,7 +509,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             }`}
           >
             <HardDrive className="w-4 h-4" />
-            <span>Database & Large Lists</span>
+            <span>Cache Manager & Storage</span>
           </button>
 
           <button
@@ -2206,6 +2227,226 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               </div>
             </div>
 
+            {/* webOS Cache Manager Card (Periodic cleanup of EPG data & temporary images) */}
+            <div className="p-5 rounded-2xl bg-gradient-to-br from-[#121526] to-[#0c0d16] border border-cyan-500/30 space-y-5 shadow-xl">
+              <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                    <Activity className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-white flex items-center space-x-2">
+                      <span>LG webOS Cache & Memory Manager</span>
+                      <span className="px-1.5 py-0.5 rounded text-[9px] font-black bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 uppercase">
+                        Active
+                      </span>
+                    </h4>
+                    <p className="text-xs text-zinc-400">
+                      Periodically purges expired EPG schedules & flushes temporary image textures to keep webOS running at 60 FPS.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={async () => {
+                    setIsCleaningCache(true);
+                    setCacheCleanNotice(null);
+                    try {
+                      const res = await CacheManagerService.runMaintenance(programs, onUpdatePrograms);
+                      setCacheCleanNotice(
+                        `Successfully purged ${res.epgPruned} past EPG items & flushed ${res.imagesPruned} cached image assets (${CacheManagerService.formatBytes(res.bytesFreed)} freed in ${res.executionTimeMs}ms).`
+                      );
+                      const stats = await IndexedDbService.getStats();
+                      setDbStats(stats);
+                    } catch (err: any) {
+                      setCacheCleanNotice(`Cache purge error: ${err.message || 'Failed'}`);
+                    } finally {
+                      setIsCleaningCache(false);
+                    }
+                  }}
+                  disabled={isCleaningCache}
+                  className="tv-focusable px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 active:scale-95 text-black font-extrabold text-xs flex items-center space-x-2 shadow-lg shadow-cyan-500/20 transition-all shrink-0"
+                >
+                  <RefreshCw className={`w-4 h-4 ${isCleaningCache ? 'animate-spin' : ''}`} />
+                  <span>{isCleaningCache ? 'Optimizing...' : 'Clean Cache Now'}</span>
+                </button>
+              </div>
+
+              {/* Status Notice */}
+              {cacheCleanNotice && (
+                <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs flex items-center space-x-2">
+                  <Check className="w-4 h-4 shrink-0 text-emerald-400" />
+                  <span>{cacheCleanNotice}</span>
+                </div>
+              )}
+
+              {/* Cache Telemetry Metrics Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                  <span className="text-[10px] text-zinc-400 block mb-0.5">Total Pruned Items</span>
+                  <span className="font-mono text-base font-bold text-white">
+                    {cacheMetrics.itemsPrunedCount.toLocaleString()}
+                  </span>
+                  <span className="text-[9px] text-zinc-500 block mt-0.5">Historical across sessions</span>
+                </div>
+
+                <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                  <span className="text-[10px] text-zinc-400 block mb-0.5">Expired EPG Purged</span>
+                  <span className="font-mono text-base font-bold text-emerald-400">
+                    {cacheMetrics.epgPrunedCount.toLocaleString()}
+                  </span>
+                  <span className="text-[9px] text-zinc-500 block mt-0.5">Slots older than {cacheSettings.purgePastEpgHours}h</span>
+                </div>
+
+                <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                  <span className="text-[10px] text-zinc-400 block mb-0.5">Temp Images Flushed</span>
+                  <span className="font-mono text-base font-bold text-cyan-400">
+                    {cacheMetrics.imagesPrunedCount.toLocaleString()}
+                  </span>
+                  <span className="text-[9px] text-zinc-500 block mt-0.5">DOM textures & blobs</span>
+                </div>
+
+                <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                  <span className="text-[10px] text-zinc-400 block mb-0.5">Est. RAM / Disk Freed</span>
+                  <span className="font-mono text-base font-bold text-purple-400">
+                    {CacheManagerService.formatBytes(cacheMetrics.freedBytesEstimate)}
+                  </span>
+                  <span className="text-[9px] text-zinc-500 block mt-0.5">
+                    {cacheMetrics.lastCleanedAt ? `Last: ${new Date(cacheMetrics.lastCleanedAt).toLocaleTimeString()}` : 'Never'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Configurable Periodic Interval & Rules */}
+              <div className="space-y-3 pt-1">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-xs font-bold text-white block">Periodic Background Cleanup Interval</span>
+                    <span className="text-[11px] text-zinc-400">
+                      Timer runs in the background and prevents webOS low-memory crashes.
+                    </span>
+                  </div>
+
+                  <div className="flex items-center space-x-1.5 bg-black/40 p-1 rounded-xl border border-white/10">
+                    {[
+                      { min: 60, label: 'Every 1h' },
+                      { min: 180, label: 'Every 3h' },
+                      { min: 360, label: 'Every 6h' },
+                      { min: 720, label: 'Every 12h' },
+                      { min: 1440, label: 'Daily' },
+                    ].map((opt) => {
+                      const isSel = cacheSettings.autoCleanEnabled && cacheSettings.intervalMinutes === opt.min;
+                      return (
+                        <button
+                          key={opt.min}
+                          onClick={() => {
+                            const updated = {
+                              ...cacheSettings,
+                              autoCleanEnabled: true,
+                              intervalMinutes: opt.min,
+                            };
+                            setCacheSettings(updated);
+                            CacheManagerService.saveSettings(updated);
+                          }}
+                          className={`tv-focusable px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                            isSel
+                              ? 'bg-cyan-500 text-black shadow-sm'
+                              : 'text-zinc-400 hover:text-white hover:bg-white/10'
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* EPG Past Cutoff Age Selector */}
+                <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                  <div>
+                    <span className="text-xs font-bold text-white block">EPG Past Program Purge Age</span>
+                    <span className="text-[11px] text-zinc-400">
+                      Discard electronic guide programs that aired more than X hours ago.
+                    </span>
+                  </div>
+
+                  <div className="flex items-center space-x-1.5 bg-black/40 p-1 rounded-xl border border-white/10">
+                    {[
+                      { hours: 2, label: '2 Hours' },
+                      { hours: 4, label: '4 Hours (Rec)' },
+                      { hours: 8, label: '8 Hours' },
+                      { hours: 24, label: '24 Hours' },
+                    ].map((opt) => {
+                      const isSel = cacheSettings.purgePastEpgHours === opt.hours;
+                      return (
+                        <button
+                          key={opt.hours}
+                          onClick={() => {
+                            const updated = {
+                              ...cacheSettings,
+                              purgePastEpgHours: opt.hours,
+                            };
+                            setCacheSettings(updated);
+                            CacheManagerService.saveSettings(updated);
+                          }}
+                          className={`tv-focusable px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                            isSel
+                              ? 'bg-emerald-500 text-black shadow-sm'
+                              : 'text-zinc-400 hover:text-white hover:bg-white/10'
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Additional webOS Toggles */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                  <div
+                    onClick={() => {
+                      const updated = {
+                        ...cacheSettings,
+                        clearTempImagesOnBoot: !cacheSettings.clearTempImagesOnBoot,
+                      };
+                      setCacheSettings(updated);
+                      CacheManagerService.saveSettings(updated);
+                    }}
+                    className="tv-focusable p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-between cursor-pointer"
+                  >
+                    <div>
+                      <span className="text-xs font-bold text-white block">Flush Image Blobs on Boot</span>
+                      <span className="text-[10px] text-zinc-400">Release texture heap immediately upon TV app launch</span>
+                    </div>
+                    <div className={`w-5 h-5 rounded-md flex items-center justify-center border ${cacheSettings.clearTempImagesOnBoot ? 'bg-cyan-500 border-cyan-400 text-black' : 'border-white/20'}`}>
+                      {cacheSettings.clearTempImagesOnBoot && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                    </div>
+                  </div>
+
+                  <div
+                    onClick={() => {
+                      const updated = {
+                        ...cacheSettings,
+                        aggressiveMemoryCompaction: !cacheSettings.aggressiveMemoryCompaction,
+                      };
+                      setCacheSettings(updated);
+                      CacheManagerService.saveSettings(updated);
+                    }}
+                    className="tv-focusable p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-between cursor-pointer"
+                  >
+                    <div>
+                      <span className="text-xs font-bold text-white block">Aggressive Heap Compaction</span>
+                      <span className="text-[10px] text-zinc-400">Collapses array pools & invokes microtask GC hints</span>
+                    </div>
+                    <div className={`w-5 h-5 rounded-md flex items-center justify-center border ${cacheSettings.aggressiveMemoryCompaction ? 'bg-cyan-500 border-cyan-400 text-black' : 'border-white/20'}`}>
+                      {cacheSettings.aggressiveMemoryCompaction && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Database Management Actions */}
             <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-4">
               <h4 className="text-sm font-bold text-white">Database Management Tools</h4>
@@ -2243,8 +2484,24 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         {/* Section 6: System Diagnostics & About */}
         {activeSection === 'about' && (
           <div className="max-w-2xl space-y-6">
+            <div className="flex items-center space-x-4 p-5 rounded-2xl bg-gradient-to-r from-white/[0.07] to-white/[0.02] border border-white/10">
+              <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-2xl shrink-0 border border-white/20 bg-[#0d0f1a]">
+                <img src="/app-icon.svg" alt="webOS IPTV Pro Logo" className="w-full h-full object-cover" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center space-x-2.5">
+                  <h3 className="text-xl font-black text-white tracking-wide">IPTV Player Pro</h3>
+                  <span className="px-2 py-0.5 text-[10px] font-black rounded-md bg-[var(--tv-accent-subtle)] text-[var(--tv-accent)] border border-[var(--tv-accent-border)] uppercase tracking-wider">
+                    webOS PRO
+                  </span>
+                </div>
+                <p className="text-xs text-zinc-400 mt-1">Official LG Content Store &amp; Homebrew application package</p>
+                <span className="text-[11px] font-mono text-zinc-500 mt-0.5 block">v1.0.0 • com.webos.iptv.pro</span>
+              </div>
+            </div>
+
             <div>
-              <h3 className="text-xl font-bold text-white mb-1">LG webOS System Diagnostics</h3>
+              <h4 className="text-sm font-bold text-white mb-1">LG webOS System Diagnostics</h4>
               <p className="text-xs text-zinc-400">Device architecture and media pipeline capabilities</p>
             </div>
 

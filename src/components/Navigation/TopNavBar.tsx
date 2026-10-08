@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Home, Tv, Film, Clapperboard, Settings, Radio, Wifi, Clock, Search, Zap } from 'lucide-react';
+import { Home, Tv, Film, Clapperboard, Settings, Radio, Wifi, Clock, Search, Zap, Mic } from 'lucide-react';
 import { AppTab } from '../../types/iptv';
+import { VoiceSearchService } from '../../services/VoiceSearchService';
 
 interface TopNavBarProps {
   activeTab: AppTab;
@@ -59,38 +60,36 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
   ];
 
   return (
-    <header className="h-16 px-4 sm:px-6 lg:px-8 flex items-center justify-between border-b border-white/10 bg-[#0a0a0c]/90 backdrop-blur-xl z-30 select-none shrink-0 gap-4">
+    <header className="h-16 px-3 sm:px-5 lg:px-8 flex items-center justify-between border-b border-white/10 bg-[#0a0a0c]/90 backdrop-blur-xl z-30 select-none shrink-0 gap-2 sm:gap-4">
       {/* Brand & Badge */}
       <button
         onClick={() => onTabChange('home')}
-        className="flex items-center space-x-3 text-left cursor-pointer group focus:outline-none shrink-0"
+        className="flex items-center space-x-2.5 sm:space-x-3 text-left cursor-pointer group focus:outline-none shrink-0"
       >
-        <div
-          className="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg transition-transform duration-200 group-hover:scale-105"
-          style={{
-            background: 'var(--tv-accent-gradient, var(--tv-accent))',
-            boxShadow: '0 4px 14px var(--tv-accent-glow)',
-          }}
-        >
-          <Tv className="w-5 h-5 text-black stroke-[2.5]" />
+        <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl overflow-hidden shadow-lg transition-transform duration-200 group-hover:scale-105 shrink-0 bg-[#121526] border border-white/15">
+          <img
+            src="/app-icon.svg"
+            alt="IPTV Player Pro"
+            className="w-full h-full object-cover"
+          />
         </div>
         <div className="flex flex-col justify-center">
-          <div className="flex items-center space-x-2 leading-none">
-            <span className="font-extrabold tracking-wider text-sm sm:text-base text-white group-hover:text-[var(--tv-accent)] transition-colors">
+          <div className="flex items-center space-x-1.5 sm:space-x-2 leading-none">
+            <span className="font-extrabold tracking-wider text-sm sm:text-base text-white group-hover:text-[var(--tv-accent)] transition-colors whitespace-nowrap">
               webOS IPTV
             </span>
             <span className="px-1.5 py-0.5 text-[9px] font-black rounded-md bg-[var(--tv-accent-subtle)] text-[var(--tv-accent)] border border-[var(--tv-accent-border)] leading-none uppercase">
               PRO
             </span>
           </div>
-          <span className="text-[10px] text-zinc-400 font-medium block mt-1 tracking-tight">
+          <span className="text-[10px] text-zinc-400 font-medium hidden sm:block mt-1 tracking-tight whitespace-nowrap">
             LG webOS Edition
           </span>
         </div>
       </button>
 
-      {/* Primary Navigation Bar Dock */}
-      <div className="flex items-center space-x-1.5 min-w-0">
+      {/* Primary Navigation Bar Dock & Quick Switcher */}
+      <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
         <nav className="flex items-center p-1 bg-white/[0.04] border border-white/10 rounded-2xl shadow-inner backdrop-blur-md">
           {navItems.map((item, idx) => {
             const isActive = activeTab === item.id;
@@ -98,7 +97,7 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
               <button
                 key={item.id}
                 onClick={() => onTabChange(item.id)}
-                className={`tv-focusable h-8 px-2.5 sm:px-3 rounded-xl text-xs font-bold flex items-center space-x-1.5 transition-all duration-150 ${
+                className={`tv-focusable h-8 px-2 sm:px-3 rounded-xl text-xs font-bold flex items-center space-x-1.5 transition-all duration-150 shrink-0 ${
                   isActive
                     ? 'bg-[var(--tv-accent)] text-black shadow-md shadow-[var(--tv-accent-glow)]'
                     : 'text-zinc-300 hover:text-white hover:bg-white/10'
@@ -106,7 +105,7 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
                 title={`Switch to ${item.label} (Remote ${idx + 1})`}
               >
                 <span className="shrink-0">{item.icon}</span>
-                <span className="hidden md:inline truncate">{item.label}</span>
+                <span className="hidden xl:inline truncate">{item.label}</span>
                 {item.badge !== undefined && item.badge > 0 && (
                   <span
                     className={`ml-1 px-1.5 py-0.2 rounded-full text-[9px] font-black ${
@@ -126,37 +125,38 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
         {/* Quick Page Switcher Launcher */}
         <button
           onClick={onOpenQuickSwitcher}
-          className="tv-focusable h-10 px-2.5 sm:px-3 rounded-2xl bg-white/[0.04] hover:bg-white/10 text-white text-xs font-bold flex items-center space-x-1.5 transition-all border border-white/10 shadow-inner shrink-0"
+          className="tv-focusable h-10 px-2 sm:px-2.5 lg:px-3 rounded-2xl bg-white/[0.04] hover:bg-white/10 text-white text-xs font-bold flex items-center space-x-1.5 transition-all border border-white/10 shadow-inner shrink-0 whitespace-nowrap"
           title="Open Quick Page Switcher (Press Q / Tab)"
         >
-          <Zap className="w-3.5 h-3.5 text-[var(--tv-accent)]" />
-          <span className="hidden xl:inline text-zinc-200">Pages</span>
-          <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-black/50 text-[var(--tv-accent)] border border-white/10">
+          <Zap className="w-3.5 h-3.5 text-[var(--tv-accent)] shrink-0" />
+          <span className="hidden 2xl:inline text-zinc-200">Pages</span>
+          <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-black/50 text-[var(--tv-accent)] border border-white/10 shrink-0">
             1–7
           </span>
         </button>
       </div>
 
       {/* Right Controls: Search, Remote Simulator, Network & Clock */}
-      <div className="flex items-center space-x-2 sm:space-x-2.5 shrink-0">
-        {/* Search button */}
+      <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+        {/* Search button with Voice badge */}
         <button
           onClick={onOpenSearch}
-          title="Search Channels & VOD (Yellow Remote Key)"
-          className="tv-focusable h-10 px-2.5 sm:px-3 rounded-2xl bg-white/[0.04] hover:bg-white/10 border border-white/10 hover:border-yellow-400/50 text-xs font-semibold text-zinc-200 transition-all flex items-center space-x-1.5 shadow-inner"
+          title="Search Channels & VOD with Voice / Remote (Yellow Key)"
+          className="tv-focusable h-10 px-2.5 sm:px-3 rounded-2xl bg-white/[0.04] hover:bg-white/10 border border-white/10 hover:border-yellow-400/50 text-xs font-semibold text-zinc-200 transition-all flex items-center space-x-1.5 shadow-inner shrink-0 whitespace-nowrap"
         >
           <Search className="w-3.5 h-3.5 text-yellow-400 shrink-0" />
-          <span className="hidden lg:inline">Search</span>
+          <span className="hidden xl:inline">Search</span>
+          <Mic className="w-3 h-3 text-rose-400 ml-0.5 opacity-90 hidden sm:inline shrink-0" />
         </button>
 
         {/* Remote simulator toggle button */}
         <button
           onClick={onOpenRemoteSim}
           title="Open On-Screen Remote Simulator"
-          className="tv-focusable h-10 px-2.5 sm:px-3 rounded-2xl bg-white/[0.04] hover:bg-white/10 border border-white/10 hover:border-[var(--tv-accent)] text-xs font-semibold text-zinc-200 transition-all flex items-center space-x-1.5 shadow-inner"
+          className="tv-focusable h-10 px-2.5 sm:px-3 rounded-2xl bg-white/[0.04] hover:bg-white/10 border border-white/10 hover:border-[var(--tv-accent)] text-xs font-semibold text-zinc-200 transition-all flex items-center space-x-1.5 shadow-inner shrink-0 whitespace-nowrap"
         >
           <Radio className="w-3.5 h-3.5 text-[var(--tv-accent)] animate-pulse shrink-0" />
-          <span className="hidden lg:inline">Remote</span>
+          <span className="hidden xl:inline">Remote</span>
         </button>
 
         {/* Network status indicator */}

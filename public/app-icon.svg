@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Card Linear & Radial Gradients -->
+    <linearGradient id="cardBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0e101a"/>
+      <stop offset="50%" stop-color="#141726"/>
+      <stop offset="100%" stop-color="#080910"/>
+    </linearGradient>
+
+    <!-- Outer Bezel / Halo Rainbow Gradient -->
+    <linearGradient id="cyberBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff0055"/>
+      <stop offset="30%" stop-color="#ff2a6d"/>
+      <stop offset="65%" stop-color="#8a2be2"/>
+      <stop offset="100%" stop-color="#00f2fe"/>
+    </linearGradient>
+
+    <!-- TV Screen Gradient -->
+    <linearGradient id="screenGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#181c2e"/>
+      <stop offset="100%" stop-color="#0a0c16"/>
+    </linearGradient>
+
+    <!-- Holographic Wave Arc Gradient -->
+    <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ff007f"/>
+      <stop offset="50%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#00f2fe"/>
+    </linearGradient>
+
+    <!-- PRO Badge Gradient -->
+    <linearGradient id="proBadgeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff0055"/>
+      <stop offset="100%" stop-color="#7928ca"/>
+    </linearGradient>
+
+    <!-- Glow & Shadow Filters -->
+    <filter id="superGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="14" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <radialGradient id="meshGlowTopLeft" cx="20%" cy="20%" r="55%">
+      <stop offset="0%" stop-color="#ff0055" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#ff0055" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="meshGlowBottomRight" cx="80%" cy="80%" r="60%">
+      <stop offset="0%" stop-color="#00f2fe" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#00f2fe" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Ambient Outer Glow -->
+  <rect x="24" y="24" width="464" height="464" rx="112" fill="#ff0055" opacity="0.2" filter="url(#superGlow)"/>
+
+  <!-- Squircle Base / webOS Tile -->
+  <rect x="24" y="24" width="464" height="464" rx="112" fill="url(#cardBg)"/>
+  <rect x="24" y="24" width="464" height="464" rx="112" fill="url(#meshGlowTopLeft)"/>
+  <rect x="24" y="24" width="464" height="464" rx="112" fill="url(#meshGlowBottomRight)"/>
+  <rect x="24" y="24" width="464" height="464" rx="112" fill="none" stroke="url(#cyberBorder)" stroke-width="4.5"/>
+
+  <!-- Subtle Horizontal Tech Grid -->
+  <g opacity="0.06" stroke="#ffffff" stroke-width="1.5">
+    <line x1="24" y1="96" x2="488" y2="96"/>
+    <line x1="24" y1="160" x2="488" y2="160"/>
+    <line x1="24" y1="224" x2="488" y2="224"/>
+    <line x1="24" y1="288" x2="488" y2="288"/>
+    <line x1="24" y1="352" x2="488" y2="352"/>
+    <line x1="24" y1="416" x2="488" y2="416"/>
+  </g>
+
+  <!-- Central OLED Screen Display Device -->
+  <g transform="translate(86, 92)">
+    <!-- Ambient TV Glow -->
+    <rect x="12" y="12" width="316" height="212" rx="28" fill="#7928ca" opacity="0.3" filter="url(#softGlow)"/>
+
+    <!-- Outer TV Bezel -->
+    <rect x="0" y="0" width="340" height="236" rx="32" fill="#1b1f2e" stroke="url(#cyberBorder)" stroke-width="3"/>
+
+    <!-- TV Display Glass -->
+    <rect x="14" y="14" width="312" height="208" rx="22" fill="url(#screenGrad)"/>
+
+    <!-- Glass Reflection Highlight -->
+    <path d="M 14 14 L 326 14 L 240 100 L 14 100 Z" fill="#ffffff" opacity="0.04"/>
+
+    <!-- Inside Screen: Live Broadcast Waveform -->
+    <path d="M 34 148 Q 78 86, 122 148 T 210 148 T 298 148" fill="none" stroke="url(#waveGrad)" stroke-width="6" stroke-linecap="round" filter="url(#softGlow)"/>
+    <path d="M 34 168 Q 84 122, 134 168 T 234 168 T 298 168" fill="none" stroke="#00f2fe" stroke-width="2.5" stroke-linecap="round" opacity="0.55"/>
+
+    <!-- Inside Screen: Central Play Symbol in Glass Disc -->
+    <circle cx="170" cy="108" r="38" fill="#1a142e" stroke="url(#waveGrad)" stroke-width="3" filter="url(#softGlow)"/>
+    <polygon points="163,91 184,108 163,125" fill="#ffffff"/>
+
+    <!-- Inside Screen: LIVE Indicator & 4K Tag -->
+    <g transform="translate(32, 32)">
+      <circle cx="8" cy="8" r="5" fill="#ff0055"/>
+      <circle cx="8" cy="8" r="10" fill="#ff0055" opacity="0.3"/>
+      <text x="22" y="13" fill="#ff3366" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="900" letter-spacing="1.5">LIVE</text>
+    </g>
+
+    <g transform="translate(254, 32)">
+      <rect x="0" y="0" width="44" height="18" rx="5" fill="#00f2fe" fill-opacity="0.15" stroke="#00f2fe" stroke-width="1.2"/>
+      <text x="22" y="13" text-anchor="middle" fill="#00f2fe" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="900" letter-spacing="1">4K</text>
+    </g>
+
+    <!-- TV Stand Base -->
+    <path d="M 134 236 L 126 274 L 214 274 L 206 236 Z" fill="#22273a"/>
+    <rect x="96" y="274" width="148" height="9" rx="4.5" fill="#3a4058"/>
+    <rect x="116" y="275" width="108" height="4" rx="2" fill="url(#cyberBorder)" opacity="0.8"/>
+  </g>
+
+  <!-- Bottom Floating "PRO" Badge -->
+  <g transform="translate(290, 386)">
+    <rect x="0" y="0" width="134" height="52" rx="16" fill="url(#proBadgeGrad)" filter="url(#softGlow)"/>
+    <rect x="0" y="0" width="134" height="52" rx="16" fill="none" stroke="#ffffff" stroke-width="1" stroke-opacity="0.3"/>
+    <text x="67" y="36" text-anchor="middle" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="28" font-weight="900" letter-spacing="3.5">PRO</text>
+  </g>
+
+  <!-- Left Bottom IPTV Text / Signal Indicator -->
+  <g transform="translate(90, 420)">
+    <text x="0" y="0" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="900" letter-spacing="2">webOS</text>
+    <text x="86" y="0" fill="#ff0055" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="900" letter-spacing="2">IPTV</text>
+  </g>
+</svg>

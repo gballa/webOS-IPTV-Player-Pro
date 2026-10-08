@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Channel, Program, VodItem, AppTab, AppSettings, PlaylistSource } from './types/iptv';
 import { StorageService } from './services/StorageService';
 import { IndexedDbService } from './services/IndexedDbService';
+import { CacheManagerService } from './services/CacheManagerService';
 import { DEFAULT_CHANNELS, generateSyntheticEpg, SAMPLE_VOD } from './services/DefaultChannels';
 import { globalRemote, RemoteEvent } from './services/RemoteController';
 import { TopNavBar } from './components/Navigation/TopNavBar';
@@ -75,6 +76,11 @@ export default function App() {
       if (series && series.length > 0) {
         setVodSeries(series);
       }
+    });
+
+    // Initialize webOS Cache Manager periodic maintenance
+    CacheManagerService.init((filteredProgs) => {
+      setPrograms(filteredProgs);
     });
   }, []);
 
@@ -447,6 +453,9 @@ export default function App() {
                 onSelectVod={handlePlayVod}
                 onOpenSearch={() => setIsSearchOpen(true)}
                 onToggleFavorite={handleToggleFavorite}
+                sleepTimerRemainingSec={sleepTimerRemainingSec}
+                onSetSleepTimer={handleSetSleepTimer}
+                onCancelSleepTimer={handleCancelSleepTimer}
               />
             )}
 
@@ -531,6 +540,8 @@ export default function App() {
                 sleepTimerRemainingSec={sleepTimerRemainingSec}
                 onSetSleepTimer={handleSetSleepTimer}
                 onCancelSleepTimer={handleCancelSleepTimer}
+                programs={programs}
+                onUpdatePrograms={setPrograms}
               />
             )}
           </main>

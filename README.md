@@ -76,6 +76,16 @@ The app runs with **100% privacy and zero external telemetry**: all playlists, X
 ### 📱 LAN Mobile Companion & QR Upload
 - **Zero Remote Typing**: Scan an on-screen QR code from your smartphone, tablet, or laptop on the same local network to upload M3U files or type Xtream credentials.
 
+### 🎙️ Web Speech Voice-to-Text Search
+- **LG Magic Remote Mic Integration**: Search for channels, live TV guide programs, movies, and TV boxsets simply by speaking into the remote's built-in microphone using the standard **Web Speech API** (`SpeechRecognition` / `webkitSpeechRecognition`).
+- **Real-Time Streaming Transcripts**: Visual speech listening waveform banner with live interim transcripts and instant fuzzy querying.
+- **Graceful Mic Permission Handling**: Informative feedback when microphone access is denied or unavailable on legacy firmwares.
+
+### 🧹 webOS Cache & Memory Manager
+- **Periodic EPG Pruning**: Automatically purges expired program schedules older than the configured threshold (e.g., 2, 4, 8, or 24 hours) to maintain high performance and prevent slow-downs.
+- **Image Texture & Asset Cleanup**: Periodically flushes temporary DOM image caches, releases leaked blob URLs, and compacts memory to preserve webOS's strict 250MB–500MB browser heap ceiling.
+- **Automated Background Schedule**: Runs automatically at user-defined intervals (Every 1h, 3h, 6h, 12h, or Daily) plus an instant **"Clean Cache Now"** button in Settings with live telemetry metrics (items pruned, memory freed, last run time).
+
 ### 🔒 Parental Controls & Sleep Timer
 - **PIN-Protected Categories**: Lock adult or custom groups behind a secure 4-digit master PIN.
 - **Sleep Timer**: Set automatic playback stop after 15, 30, 45, 60, 90, or 120 minutes.
