@@ -579,29 +579,78 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
             {/* Add M3U URL Form */}
             <div className="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-4">
-              <h4 className="text-sm font-bold text-white flex items-center space-x-2">
-                <Plus className="w-4 h-4 text-cyan-400" />
-                <span>Add M3U / M3U8 Playlist URL</span>
-              </h4>
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-bold text-white flex items-center space-x-2">
+                  <Plus className="w-4 h-4 text-cyan-400" />
+                  <span>Input Remote M3U / M3U8 Playlist URL</span>
+                </h4>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                  Live TV + VOD Movies + Series
+                </span>
+              </div>
+              <p className="text-xs text-zinc-400">
+                Enter any remote M3U or M3U8 web address. The engine automatically downloads, parses channels and VODs, groups TV series episodes, and stores them in high-capacity IndexedDB storage with zero UI freeze.
+              </p>
 
-              <div className="grid grid-cols-2 gap-3">
-                <input
-                  type="text"
-                  placeholder="Playlist Name (e.g. My Provider Live)"
-                  value={playlistName}
-                  onChange={e => setPlaylistName(e.target.value)}
-                  className="bg-black/40 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-400"
-                />
-                <input
-                  type="url"
-                  placeholder="https://example.com/playlist.m3u8"
-                  value={m3uUrl}
-                  onChange={e => setM3uUrl(e.target.value)}
-                  className="bg-black/40 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-400"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-zinc-300 mb-1">Playlist Name</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. My Provider Live & Cinema"
+                    value={playlistName}
+                    onChange={e => setPlaylistName(e.target.value)}
+                    className="w-full bg-black/40 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-zinc-300 mb-1">Remote M3U / M3U8 URL</label>
+                  <input
+                    type="url"
+                    placeholder="https://example.com/playlist.m3u8 or http://..."
+                    value={m3uUrl}
+                    onChange={e => setM3uUrl(e.target.value)}
+                    className="w-full bg-black/40 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-400 font-mono"
+                  />
+                </div>
               </div>
 
-              <div className="flex items-center justify-between pt-1">
+              {/* Quick Preset / Sample URLs for Instant Testing */}
+              <div className="flex items-center space-x-2 pt-1 text-xs text-zinc-400">
+                <span className="text-[11px] text-zinc-500">Quick Test Samples:</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setM3uUrl('https://iptv-org.github.io/iptv/index.m3u');
+                    if (!playlistName) setPlaylistName('IPTV-Org Global');
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/15 text-zinc-300 text-[11px] font-medium border border-white/10 transition-colors"
+                >
+                  IPTV-org (Worldwide)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setM3uUrl('https://iptv-org.github.io/iptv/countries/us.m3u');
+                    if (!playlistName) setPlaylistName('US Public Broadcasts');
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/15 text-zinc-300 text-[11px] font-medium border border-white/10 transition-colors"
+                >
+                  US Channels
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setM3uUrl('https://iptv-org.github.io/iptv/categories/news.m3u');
+                    if (!playlistName) setPlaylistName('Global News Stream');
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/15 text-zinc-300 text-[11px] font-medium border border-white/10 transition-colors"
+                >
+                  News Feeds
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between pt-2 border-t border-white/10">
                 <label className="tv-focusable cursor-pointer px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white flex items-center space-x-2">
                   <Upload className="w-4 h-4" />
                   <span>Upload .m3u File</span>
@@ -616,15 +665,18 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 <button
                   onClick={handleImportM3uUrl}
                   disabled={isImporting || !m3uUrl.trim()}
-                  className="tv-focusable px-6 py-2.5 rounded-xl bg-[var(--tv-accent)] hover:brightness-110 disabled:opacity-50 text-black font-extrabold text-xs flex items-center space-x-2 shadow-lg shadow-[var(--tv-accent-glow)]"
+                  className="tv-focusable px-6 py-2.5 rounded-xl bg-[var(--tv-accent)] hover:brightness-110 disabled:opacity-50 text-black font-extrabold text-xs flex items-center space-x-2 shadow-lg shadow-[var(--tv-accent-glow)] transition-all"
                 >
                   {isImporting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                  <span>Import Playlist</span>
+                  <span>{isImporting ? 'Fetching & Parsing...' : 'Fetch & Populate Catalog'}</span>
                 </button>
               </div>
 
               {importStatus && (
-                <div className="text-xs font-semibold text-[var(--tv-accent)] pt-2">{importStatus}</div>
+                <div className="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-xs font-semibold text-[var(--tv-accent)] flex items-center space-x-2">
+                  <Check className="w-4 h-4 shrink-0 text-cyan-400" />
+                  <span>{importStatus}</span>
+                </div>
               )}
             </div>
 

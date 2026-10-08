@@ -154,14 +154,31 @@ export class StreamingPlaylistParser {
 
   /**
    * Stream parse from an HTTP URL (via ReadableStream response)
+   * Automatically attempts direct fetch first, and falls back to /api/m3u-proxy if blocked by CORS
    */
   static async parseUrlStream(
     url: string,
     onProgress?: (progress: StreamingParseProgress) => void,
     signal?: AbortSignal
   ): Promise<StreamingParseResult> {
-    const response = await fetch(url, { signal });
-    if (!response.ok) throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
+    let response: Response;
+
+    try {
+      response = await fetch(url, { signal });
+      if (!response.ok) {
+        throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
+      }
+    } catch (directErr: any) {
+      if (signal?.aborted) throw directErr;
+      // If direct fetch fails (typically CORS or mixed content on browser / webOS), fallback to backend proxy
+      console.warn('[StreamingPlaylistParser] Direct fetch failed, trying proxy...', directErr.message);
+      const proxyUrl = `/api/m3u-proxy?url=${encodeURIComponent(url)}`;
+      response = await fetch(proxyUrl, { signal });
+      if (!response.ok) {
+        const errBody = await response.text().catch(() => '');
+        throw new Error(errBody || `HTTP Error ${response.status}: ${response.statusText}`);
+      }
+    }
 
     const contentLength = response.headers.get('content-length');
     const totalBytes = contentLength ? parseInt(contentLength, 10) : 100 * 1024 * 1024; // Fallback estimate

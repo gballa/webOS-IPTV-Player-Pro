@@ -108,6 +108,69 @@ Guide users on finding live events, kickoff times, broadcast quality, and config
   }
 });
 
+// Proxy endpoint for remote M3U playlist URLs to prevent CORS blocks on TV browsers
+app.get('/api/m3u-proxy', async (req, res) => {
+  const targetUrl = req.query.url as string;
+  if (!targetUrl) {
+    return res.status(400).send('Missing "url" query parameter.');
+  }
+
+  try {
+    const parsedUrl = new URL(targetUrl);
+    if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+      return res.status(400).send('Invalid protocol. Only http and https URLs are supported.');
+    }
+
+    const abortController = new AbortController();
+    const timeout = setTimeout(() => abortController.abort(), 35000); // 35s timeout for large playlists
+
+    req.on('close', () => {
+      clearTimeout(timeout);
+      abortController.abort();
+    });
+
+    const response = await fetch(targetUrl, {
+      signal: abortController.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (SmartHub; SMART-TV; Linux/SmartTV; webOS.TV) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.79 Safari/537.36',
+        'Accept': '*/*',
+      },
+    });
+
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+      return res.status(response.status).send(`Upstream HTTP error ${response.status}: ${response.statusText}`);
+    }
+
+    const contentType = response.headers.get('content-type') || 'text/plain; charset=utf-8';
+    res.setHeader('Content-Type', contentType);
+    const contentLength = response.headers.get('content-length');
+    if (contentLength) {
+      res.setHeader('Content-Length', contentLength);
+    }
+
+    if (response.body) {
+      // Pipe streaming chunks directly from upstream to client
+      const reader = response.body.getReader();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        res.write(value);
+      }
+      res.end();
+    } else {
+      const text = await response.text();
+      res.send(text);
+    }
+  } catch (err: any) {
+    console.error('[m3u-proxy] Error fetching playlist:', err.message);
+    if (!res.headersSent) {
+      res.status(502).send(`Failed to fetch remote M3U: ${err.message || 'Unknown network error'}`);
+    }
+  }
+});
+
 // Setup Vite in development or serve static build in production
 async function startServer() {
   const isDev = process.env.NODE_ENV !== 'production';
