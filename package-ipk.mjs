@@ -1,11 +1,11 @@
 /**
  * Standalone webOS IPK packager.
- * Produces a valid, installable .ipk package complying with webOS 4.0 - webOS 26 specs.
- * Can be installed on LG webOS TVs via Developer Mode CLI (ares-install), webOS Dev Manager, or Homebrew Channel.
+ * Produces a strictly compliant Debian AR-format .ipk package complying with
+ * LG webOS 4.0 - webOS 26 specs, avoiding "ipk verified failed" errors caused by
+ * invalid outer formats or epoch-zero timestamps.
  */
 import fs from 'fs';
 import path from 'path';
-import zlib from 'zlib';
 import { execSync } from 'child_process';
 
 const PKG_ID = 'com.webos.iptv.pro';
@@ -16,8 +16,8 @@ console.log(`[Packager] Packaging webOS application into ${IPK_NAME}...`);
 
 // Ensure dist directory exists
 if (!fs.existsSync('dist')) {
-  console.error('[Packager] Error: dist/ directory does not exist. Run npm run build first.');
-  process.exit(1);
+  console.log('[Packager] dist/ missing, running npm run build first...');
+  execSync('npm run build', { stdio: 'inherit' });
 }
 
 // Copy appinfo.json and icons to dist/
@@ -25,7 +25,7 @@ fs.copyFileSync('appinfo.json', 'dist/appinfo.json');
 if (fs.existsSync('icon.png')) fs.copyFileSync('icon.png', 'dist/icon.png');
 if (fs.existsSync('largeIcon.png')) fs.copyFileSync('largeIcon.png', 'dist/largeIcon.png');
 
-// If ares-package is available on the machine, prefer official ares-package
+// Check if official ares-package is available
 let aresAvailable = false;
 try {
   execSync('ares-package --version', { stdio: 'ignore' });
@@ -36,22 +36,23 @@ try {
 
 if (aresAvailable) {
   console.log('[Packager] Using system ares-package tool...');
-  execSync(`ares-package dist bundled-service -o . --no-minify`, { stdio: 'inherit' });
+  execSync(`ares-package dist -o . --no-minify`, { stdio: 'inherit' });
   console.log(`[Packager] Successfully generated ${IPK_NAME} using ares-package!`);
 } else {
-  console.log('[Packager] ares-package not in PATH; generating Debian-format .ipk package using native tar/ar pipeline...');
+  console.log('[Packager] Using native compliant Debian AR packager with valid webOS timestamps...');
 
-  // Create staging directory
   const stageDir = path.resolve('.ipk_staging');
   if (fs.existsSync(stageDir)) {
     fs.rmSync(stageDir, { recursive: true, force: true });
   }
   fs.mkdirSync(stageDir, { recursive: true });
 
-  // 1. debian-binary
-  fs.writeFileSync(path.join(stageDir, 'debian-binary'), '2.0\n');
+  const currentEpoch = Math.floor(Date.now() / 1000);
 
-  // 2. control file
+  // 1. debian-binary
+  const debianBinaryContent = Buffer.from('2.0\n', 'ascii');
+
+  // 2. control.tar.gz
   const controlContent = `Package: ${PKG_ID}
 Version: ${VERSION}
 Section: misc
@@ -65,42 +66,73 @@ Description: High-performance IPTV player for LG webOS TVs featuring 10-foot spa
   fs.mkdirSync(controlDir);
   fs.writeFileSync(path.join(controlDir, 'control'), controlContent);
 
-  // Archive control.tar.gz
-  execSync(`tar -czf ${path.join(stageDir, 'control.tar.gz')} -C ${controlDir} .`);
+  const controlTarGz = path.join(stageDir, 'control.tar.gz');
+  // Use GNU tar format with current mtime to avoid epoch-zero pkgverifier failure
+  execSync(`tar --format=gnu --mtime='@${currentEpoch}' --owner=0 --group=0 -czf "${controlTarGz}" -C "${controlDir}" .`);
 
-  // 3. data.tar.gz containing dist files installed to /media/developer/apps/usr/palm/applications/com.webos.iptv.pro
+  // 3. data.tar.gz
   const dataDir = path.join(stageDir, 'data_dir', 'usr', 'palm', 'applications', PKG_ID);
   fs.mkdirSync(dataDir, { recursive: true });
+  execSync(`cp -r dist/* "${dataDir}"`);
 
-  // Copy dist files into target path
-  execSync(`cp -r dist/* ${dataDir}`);
   if (fs.existsSync('bundled-service')) {
     const srvDir = path.join(stageDir, 'data_dir', 'usr', 'palm', 'services', `${PKG_ID}.service`);
     fs.mkdirSync(srvDir, { recursive: true });
-    execSync(`cp -r bundled-service/* ${srvDir}`);
+    execSync(`cp -r bundled-service/* "${srvDir}"`);
   }
 
   const dataTarGz = path.join(stageDir, 'data.tar.gz');
-  execSync(`tar -czf ${dataTarGz} -C ${path.join(stageDir, 'data_dir')} .`);
+  execSync(`tar --format=gnu --mtime='@${currentEpoch}' --owner=0 --group=0 -czf "${dataTarGz}" -C "${path.join(stageDir, 'data_dir')}" .`);
 
-  // 4. Create .ipk archive (standard Debian ar or tar archive format)
-  // Check if `ar` is available
-  let arAvailable = false;
-  try {
-    execSync('ar --version', { stdio: 'ignore' });
-    arAvailable = true;
-  } catch {
-    arAvailable = false;
+  // 4. Construct Debian AR container format:
+  // Signature: !<arch>\n
+  // Each entry header is 60 bytes:
+  // - name: 16 bytes (name/ padded with spaces)
+  // - mtime: 12 bytes
+  // - uid: 6 bytes
+  // - gid: 6 bytes
+  // - mode: 8 bytes (octal, e.g. 100644  )
+  // - size: 10 bytes
+  // - magic trailer: 2 bytes (`\n)
+  // Followed by file data, plus a newline padding byte if file size is odd.
+  function buildArHeader(name, size, mtime) {
+    const entryName = (name + '/').padEnd(16, ' ');
+    const ts = String(mtime).padEnd(12, ' ');
+    const uid = '0'.padEnd(6, ' ');
+    const gid = '0'.padEnd(6, ' ');
+    const mode = '100644'.padEnd(8, ' ');
+    const sizeStr = String(size).padEnd(10, ' ');
+    const magicTrailer = '`\n';
+    const rawHeader = entryName + ts + uid + gid + mode + sizeStr + magicTrailer;
+    return Buffer.from(rawHeader, 'ascii');
   }
 
-  if (arAvailable) {
-    execSync(`ar -cr ${IPK_NAME} ${path.join(stageDir, 'debian-binary')} ${path.join(stageDir, 'control.tar.gz')} ${dataTarGz}`);
-  } else {
-    // Standard tar format is accepted by webOS ipkg / opkg
-    execSync(`tar -czf ${IPK_NAME} -C ${stageDir} debian-binary control.tar.gz data.tar.gz`);
+  const controlTarGzBuffer = fs.readFileSync(controlTarGz);
+  const dataTarGzBuffer = fs.readFileSync(dataTarGz);
+
+  const arMembers = [
+    { name: 'debian-binary', data: debianBinaryContent },
+    { name: 'control.tar.gz', data: controlTarGzBuffer },
+    { name: 'data.tar.gz', data: dataTarGzBuffer },
+  ];
+
+  const fd = fs.openSync(IPK_NAME, 'w');
+  fs.writeSync(fd, Buffer.from('!<arch>\n', 'ascii'));
+
+  for (const member of arMembers) {
+    const header = buildArHeader(member.name, member.data.length, currentEpoch);
+    fs.writeSync(fd, header);
+    fs.writeSync(fd, member.data);
+    if (member.data.length % 2 !== 0) {
+      fs.writeSync(fd, Buffer.from('\n', 'ascii'));
+    }
   }
+
+  fs.closeSync(fd);
 
   // Cleanup staging
   fs.rmSync(stageDir, { recursive: true, force: true });
-  console.log(`[Packager] Build complete: ${IPK_NAME} (${(fs.statSync(IPK_NAME).size / 1024).toFixed(1)} KB)`);
+
+  const finalSize = (fs.statSync(IPK_NAME).size / 1024).toFixed(1);
+  console.log(`[Packager] Build complete: ${IPK_NAME} (${finalSize} KB) [Debian AR format with webOS timestamp validation]`);
 }

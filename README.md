@@ -314,8 +314,12 @@ For rapid visual testing without setting up SSH or wireless pairing tools:
 
 ### 💡 Installation Troubleshooting & Tips
 
+* **"luna-send command failed <ipk verified failed>"**:
+  - **Cause 1 (Container Format)**: The IPK must be an authentic **Debian AR (`!<arch>\n`)** archive rather than a gzip/tarball. Running `npm run package:ipk` now automatically generates a compliant Debian AR archive.
+  - **Cause 2 (Epoch-Zero Timestamps)**: LG's internal `pkgverifier` uses GNU tar 1.17, which treats epoch-zero timestamps (1969/1970) as fatal extraction errors. The packager enforces valid current timestamps (`--mtime` and GNU tar headers) to pass validation.
+  - **Cause 3 (Dev Mode Key Mismatch)**: If installing via `ares-install`, ensure you are connected to the TV using the active Developer Mode session (`ares-setup-device -l` to verify). If Developer Mode expired on the TV screen, reopen the **Developer Mode** app and click **Extend**, then re-run `ares-install`.
 * **Session Expired (Dev Mode)**: Developer Mode apps expire after 50 hours unless renewed. In webOS Dev Manager, enable **Auto-renew developer session** in device settings, or click **Extend** in the TV's Developer Mode app. Rooted installations do not have this limitation.
-* **Certificate / Signature Mismatch**: The package created by `package-ipk.mjs` uses the Debian AR container format standard compatible with webOS internal un-signed sideloading (`com.webos.appInstallService`). If your TV complains about signature verification, ensure Developer Mode is active.
+* **Certificate / Signature Mismatch**: The package created by `package-ipk.mjs` uses the Debian AR container format standard compatible with webOS internal unsigned sideloading (`com.webos.appInstallService`). If your TV complains about signature verification, ensure Developer Mode is active.
 * **App Disappeared After TV Reboot**: On some older webOS versions, developer apps are purged on deep reboot if the Developer Mode app is not running. Simply reopen the **Developer Mode** app on the TV to refresh the installed package list.
 * **Network Connectivity**: Ensure both your PC and LG TV are connected to the same local network subnet (2.4GHz / 5GHz Wi-Fi or Ethernet). If connection fails, check whether your router has client isolation (AP isolation) enabled.
 
