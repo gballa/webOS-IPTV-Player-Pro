@@ -1,10 +1,10 @@
 {
-  "id": "com.webos.iptv.pro",
+  "id": "com.theiptvplayer.pro",
   "version": "1.0.0",
-  "vendor": "LG webOS Community",
+  "vendor": "The IPTV Player PRO Community",
   "type": "web",
   "main": "index.html",
-  "title": "IPTV Player Pro",
+  "title": "The IPTV Player PRO",
   "icon": "icon.png",
   "largeIcon": "largeIcon.png",
   "resolution": "1920x1080",

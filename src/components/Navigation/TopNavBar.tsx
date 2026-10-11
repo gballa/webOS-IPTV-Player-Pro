@@ -69,14 +69,14 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
         <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl overflow-hidden shadow-lg transition-transform duration-200 group-hover:scale-105 shrink-0 bg-[#121526] border border-white/15">
           <img
             src="/app-icon.svg"
-            alt="IPTV Player Pro"
+            alt="The IPTV Player PRO"
             className="w-full h-full object-cover"
           />
         </div>
         <div className="flex flex-col justify-center">
           <div className="flex items-center space-x-1.5 sm:space-x-2 leading-none">
             <span className="font-extrabold tracking-wider text-sm sm:text-base text-white group-hover:text-[var(--tv-accent)] transition-colors whitespace-nowrap">
-              webOS IPTV
+              The IPTV Player
             </span>
             <span className="px-1.5 py-0.5 text-[9px] font-black rounded-md bg-[var(--tv-accent-subtle)] text-[var(--tv-accent)] border border-[var(--tv-accent-border)] leading-none uppercase">
               PRO

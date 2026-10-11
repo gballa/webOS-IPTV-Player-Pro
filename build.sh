@@ -2,7 +2,7 @@
 set -e
 
 echo "=================================================="
-echo " LG webOS IPTV Player Pro — Production Build Pipeline "
+echo " The IPTV Player PRO — Production Build Pipeline "
 echo "=================================================="
 
 # 1. Type-check & Verification
@@ -21,7 +21,7 @@ node generate-icons.mjs
 echo "[4/4] Generating installable webOS .ipk package..."
 node package-ipk.mjs
 
-IPK_FILE="com.webos.iptv.pro_1.0.0_all.ipk"
+IPK_FILE="com.theiptvplayer.pro_1.0.0_all.ipk"
 
 if [ -f "$IPK_FILE" ]; then
   echo ""
@@ -36,8 +36,8 @@ if [ "$1" == "--install" ]; then
   echo "Deploying $IPK_FILE to LG TV device '$DEVICE'..."
   if command -v ares-install &> /dev/null; then
     ares-install -d "$DEVICE" "$IPK_FILE"
-    echo "Cold-launching com.webos.iptv.pro on '$DEVICE'..."
-    ares-launch -d "$DEVICE" com.webos.iptv.pro
+    echo "Cold-launching com.theiptvplayer.pro on '$DEVICE'..."
+    ares-launch -d "$DEVICE" com.theiptvplayer.pro
   else
     echo "ares-install not found. You can install '$IPK_FILE' via webOS Dev Manager or Homebrew Channel."
   fi

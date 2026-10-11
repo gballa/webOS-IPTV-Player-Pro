@@ -1,14 +1,13 @@
 /**
  * Standalone webOS IPK packager.
  * Produces a strictly compliant Debian AR-format .ipk package complying with
- * LG webOS 4.0 - webOS 26 specs, avoiding "ipk verified failed" errors caused by
- * invalid outer formats or epoch-zero timestamps.
+ * LG webOS 4.0 - webOS 26 specs for "The IPTV Player PRO".
  */
 import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
 
-const PKG_ID = 'com.webos.iptv.pro';
+const PKG_ID = 'com.theiptvplayer.pro';
 const VERSION = '1.0.0';
 const IPK_NAME = `${PKG_ID}_${VERSION}_all.ipk`;
 
@@ -58,8 +57,8 @@ Version: ${VERSION}
 Section: misc
 Priority: optional
 Architecture: all
-Maintainer: LG webOS Community
-Description: High-performance IPTV player for LG webOS TVs featuring 10-foot spatial navigation, native 4K/HDR engine, EPG, Xtream Codes, and Live DVR.
+Maintainer: The IPTV Player PRO Community
+Description: The IPTV Player PRO - High-performance IPTV player for LG webOS TVs featuring 10-foot spatial navigation, native 4K/HDR engine, EPG, Xtream Codes, and Live DVR.
 `;
 
   const controlDir = path.join(stageDir, 'control_dir');
@@ -67,7 +66,6 @@ Description: High-performance IPTV player for LG webOS TVs featuring 10-foot spa
   fs.writeFileSync(path.join(controlDir, 'control'), controlContent);
 
   const controlTarGz = path.join(stageDir, 'control.tar.gz');
-  // Use GNU tar format with current mtime to avoid epoch-zero pkgverifier failure
   execSync(`tar --format=gnu --mtime='@${currentEpoch}' --owner=0 --group=0 -czf "${controlTarGz}" -C "${controlDir}" .`);
 
   // 3. data.tar.gz
@@ -85,16 +83,6 @@ Description: High-performance IPTV player for LG webOS TVs featuring 10-foot spa
   execSync(`tar --format=gnu --mtime='@${currentEpoch}' --owner=0 --group=0 -czf "${dataTarGz}" -C "${path.join(stageDir, 'data_dir')}" .`);
 
   // 4. Construct Debian AR container format:
-  // Signature: !<arch>\n
-  // Each entry header is 60 bytes:
-  // - name: 16 bytes (name/ padded with spaces)
-  // - mtime: 12 bytes
-  // - uid: 6 bytes
-  // - gid: 6 bytes
-  // - mode: 8 bytes (octal, e.g. 100644  )
-  // - size: 10 bytes
-  // - magic trailer: 2 bytes (`\n)
-  // Followed by file data, plus a newline padding byte if file size is odd.
   function buildArHeader(name, size, mtime) {
     const entryName = (name + '/').padEnd(16, ' ');
     const ts = String(mtime).padEnd(12, ' ');
@@ -134,5 +122,5 @@ Description: High-performance IPTV player for LG webOS TVs featuring 10-foot spa
   fs.rmSync(stageDir, { recursive: true, force: true });
 
   const finalSize = (fs.statSync(IPK_NAME).size / 1024).toFixed(1);
-  console.log(`[Packager] Build complete: ${IPK_NAME} (${finalSize} KB) [Debian AR format with webOS timestamp validation]`);
+  console.log(`[Packager] Build complete: ${IPK_NAME} (${finalSize} KB) [The IPTV Player PRO - Debian AR format]`);
 }

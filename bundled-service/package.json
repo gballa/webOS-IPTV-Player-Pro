@@ -1,6 +1,6 @@
 {
-  "name": "com.webos.iptv.pro.service",
+  "name": "com.theiptvplayer.pro.service",
   "version": "1.0.0",
-  "description": "Background LAN companion & EPG refresher service for webOS IPTV Pro",
+  "description": "Background LAN companion & EPG refresher service for The IPTV Player PRO",
   "main": "service.js"
 }

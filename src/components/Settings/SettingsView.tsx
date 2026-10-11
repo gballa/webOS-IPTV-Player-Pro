@@ -2538,17 +2538,17 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           <div className="max-w-2xl space-y-6">
             <div className="flex items-center space-x-4 p-5 rounded-2xl bg-gradient-to-r from-white/[0.07] to-white/[0.02] border border-white/10">
               <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-2xl shrink-0 border border-white/20 bg-[#0d0f1a]">
-                <img src="/app-icon.svg" alt="webOS IPTV Pro Logo" className="w-full h-full object-cover" />
+                <img src="/app-icon.svg" alt="The IPTV Player PRO Logo" className="w-full h-full object-cover" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center space-x-2.5">
-                  <h3 className="text-xl font-black text-white tracking-wide">IPTV Player Pro</h3>
+                  <h3 className="text-xl font-black text-white tracking-wide">The IPTV Player PRO</h3>
                   <span className="px-2 py-0.5 text-[10px] font-black rounded-md bg-[var(--tv-accent-subtle)] text-[var(--tv-accent)] border border-[var(--tv-accent-border)] uppercase tracking-wider">
-                    webOS PRO
+                    PRO
                   </span>
                 </div>
-                <p className="text-xs text-zinc-400 mt-1">Official LG Content Store &amp; Homebrew application package</p>
-                <span className="text-[11px] font-mono text-zinc-500 mt-0.5 block">v1.0.0 • com.webos.iptv.pro</span>
+                <p className="text-xs text-zinc-400 mt-1">Official LG webOS Application Package</p>
+                <span className="text-[11px] font-mono text-zinc-500 mt-0.5 block">v1.0.0 • com.theiptvplayer.pro</span>
               </div>
             </div>
 
@@ -2585,7 +2585,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             </div>
 
             <div className="p-4 rounded-2xl bg-[var(--tv-accent-subtle)] border border-[var(--tv-accent-border)] text-xs text-[var(--tv-accent)]">
-              Package ID: <span className="font-mono text-white font-bold">com.webos.iptv.pro</span> — Ready for Developer Mode / Homebrew Channel installation.
+              Package ID: <span className="font-mono text-white font-bold">com.theiptvplayer.pro</span> — Ready for Developer Mode / Homebrew Channel installation.
             </div>
           </div>
         )}

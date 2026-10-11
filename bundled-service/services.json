@@ -1,9 +1,9 @@
 {
-  "id": "com.webos.iptv.pro.service",
-  "description": "Background service for IPTV companion and notifications",
+  "id": "com.theiptvplayer.pro.service",
+  "description": "Background service for The IPTV Player PRO companion and notifications",
   "services": [
     {
-      "name": "com.webos.iptv.pro.service"
+      "name": "com.theiptvplayer.pro.service"
     }
   ]
 }

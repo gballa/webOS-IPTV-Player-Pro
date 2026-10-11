@@ -1,8 +1,8 @@
-# webOS IPTV Player Pro 📺
+# The IPTV Player PRO 📺
 
 <div align="center">
 
-<img src="./public/logo.svg" alt="webOS IPTV Player Pro Banner" width="100%" style="max-width: 980px;" />
+<img src="./public/logo.svg" alt="The IPTV Player PRO Banner" width="100%" style="max-width: 980px;" />
 
 [![Platform](https://img.shields.io/badge/Platform-LG%20webOS%204.0%20--%2026%2B-a50034.svg?style=for-the-badge&logo=lg)](https://www.webosose.org/)
 [![React](https://img.shields.io/badge/React-19.0-61dafb.svg?style=for-the-badge&logo=react)](https://react.dev/)
@@ -30,7 +30,7 @@
 
 ## 🌟 Executive Summary
 
-**webOS IPTV Player Pro** is a modern streaming television platform engineered to run seamlessly on LG Smart TVs from **webOS 4.0 (Chromium 53 baseline)** through the newest **webOS 26+ OLED TVs**.
+**The IPTV Player PRO** is a modern streaming television platform engineered to run seamlessly on LG Smart TVs from **webOS 4.0 (Chromium 53 baseline)** through the newest **webOS 26+ OLED TVs**.
 
 It combines a **hardware-accelerated media pipeline** with an ultra-responsive, virtualized user interface designed specifically for the **10-foot living room viewing distance** (tested on 42", 55", 65", and 77" 4K displays).
 
@@ -155,14 +155,14 @@ chmod +x build.sh
 3. **Asset Generation**: `node generate-icons.mjs` creates the required webOS TV icons (`icon.png` 80x80, `largeIcon.png` 130x130, splash screens).
 4. **IPK Packaging**: `node package-ipk.mjs` generates the self-contained installation file:
    ```
-   com.webos.iptv.pro_1.0.0_all.ipk
+   com.theiptvplayer.pro_1.0.0_all.ipk
    ```
 
 ---
 
 ## 📦 How to Install the Bundle (.ipk) on Your LG TV
 
-You have multiple methods to install the compiled `com.webos.iptv.pro_1.0.0_all.ipk` package onto your LG webOS Smart TV, ranging from beginner-friendly graphical apps to advanced developer CLI and Homebrew options. Choose the method that best matches your setup:
+You have multiple methods to install the compiled `com.theiptvplayer.pro_1.0.0_all.ipk` package onto your LG webOS Smart TV, ranging from beginner-friendly graphical apps to advanced developer CLI and Homebrew options. Choose the method that best matches your setup:
 
 | Method | Best For | Root Required? | Difficulty |
 |:---|:---|:---:|:---:|
@@ -197,10 +197,10 @@ You have multiple methods to install the compiled `com.webos.iptv.pro_1.0.0_all.
 5. Enter the **Passphrase** shown on your TV screen, then click **Connect / Save**.
 
 #### Step 3: Install the App
-1. Build or download `com.webos.iptv.pro_1.0.0_all.ipk`.
+1. Build or download `com.theiptvplayer.pro_1.0.0_all.ipk`.
 2. In webOS Dev Manager, navigate to the **Apps** tab.
 3. Click **Install...** (or drag and drop the `.ipk` file into the window).
-4. Select `com.webos.iptv.pro_1.0.0_all.ipk` and confirm.
+4. Select `com.theiptvplayer.pro_1.0.0_all.ipk` and confirm.
 5. In 5–10 seconds, the app will appear in your TV's webOS launcher ribbon!
 
 ---
@@ -223,13 +223,13 @@ ares-novacom --device tv --getkey
 #### Step 2: Install and Launch
 ```bash
 # Install the compiled package to your TV
-ares-install -d tv com.webos.iptv.pro_1.0.0_all.ipk
+ares-install -d tv com.theiptvplayer.pro_1.0.0_all.ipk
 
 # Immediately cold-launch the player on the TV screen
-ares-launch -d tv com.webos.iptv.pro
+ares-launch -d tv com.theiptvplayer.pro
 
 # Optional: Inspect live runtime logs and console output
-ares-launch -d tv -i com.webos.iptv.pro
+ares-launch -d tv -i com.theiptvplayer.pro
 ```
 
 You can also automate build and deployment in one step using the included script:
@@ -247,28 +247,28 @@ If your TV is rooted (e.g. via [RootMy.TV](https://rootmy.tv/) or [dejavulnerabl
 1. Open the **Homebrew Channel** on your LG TV.
 2. In the Homebrew Channel Settings, ensure **Local HTTP Server** is enabled.
 3. Open a browser on your PC or smartphone and go to your TV's IP address: `http://<TV_IP_ADDRESS>:1234/`.
-4. Upload `com.webos.iptv.pro_1.0.0_all.ipk` via the web interface.
+4. Upload `com.theiptvplayer.pro_1.0.0_all.ipk` via the web interface.
 5. Tap **Install** — the app installs immediately with root privileges (no 50-hour session timeout).
 
 #### Option B: Self-Hosted Custom Repo
-1. Place `com.webos.iptv.pro_1.0.0_all.ipk` and a small `repo.json` manifest on your home NAS or local HTTP server:
+1. Place `com.theiptvplayer.pro_1.0.0_all.ipk` and a small `repo.json` manifest on your home NAS or local HTTP server:
    ```json
    {
      "packages": [
        {
-         "id": "com.webos.iptv.pro",
+         "id": "com.theiptvplayer.pro",
          "version": "1.0.0",
-         "name": "webOS IPTV Player Pro",
+         "name": "The IPTV Player PRO",
          "type": "native",
          "description": "High-performance hardware-accelerated IPTV & VOD Player for LG webOS",
          "icon": "https://your-server/icon.png",
-         "sourceUrl": "https://your-server/com.webos.iptv.pro_1.0.0_all.ipk"
+         "sourceUrl": "https://your-server/com.theiptvplayer.pro_1.0.0_all.ipk"
        }
      ]
    }
    ```
 2. In the Homebrew Channel settings on your TV, add `http://your-server/repo.json` under **Custom Repositories**.
-3. Browse the store, select **webOS IPTV Player Pro**, and click **Install**.
+3. Browse the store, select **The IPTV Player PRO**, and click **Install**.
 
 ---
 
@@ -278,9 +278,9 @@ If you have SSH access to your TV (via developer mode on port 9922 or root SSH o
 
 1. **Transfer the package via SCP:**
    ```bash
-   scp -P 9922 com.webos.iptv.pro_1.0.0_all.ipk prisoner@192.168.1.50:/tmp/
+   scp -P 9922 com.theiptvplayer.pro_1.0.0_all.ipk prisoner@192.168.1.50:/tmp/
    # Or for rooted TV (port 22):
-   # scp com.webos.iptv.pro_1.0.0_all.ipk root@192.168.1.50:/tmp/
+   # scp com.theiptvplayer.pro_1.0.0_all.ipk root@192.168.1.50:/tmp/
    ```
 
 2. **SSH into the TV and trigger the Luna Bus Installer:**
@@ -289,13 +289,13 @@ If you have SSH access to your TV (via developer mode on port 9922 or root SSH o
 
    # Install the package using the native webOS application manager bus
    luna-send-pub -i -u palm://com.webos.appInstallService/install \
-     '{"id":"com.webos.iptv.pro","ipkUrl":"/tmp/com.webos.iptv.pro_1.0.0_all.ipk","subscribe":true}'
+     '{"id":"com.theiptvplayer.pro","ipkUrl":"/tmp/com.theiptvplayer.pro_1.0.0_all.ipk","subscribe":true}'
    ```
 
 3. **Launch the application:**
    ```bash
    luna-send-pub -n -u palm://com.webos.applicationManager/launch \
-     '{"id":"com.webos.iptv.pro"}'
+     '{"id":"com.theiptvplayer.pro"}'
    ```
 
 ---
@@ -306,7 +306,7 @@ For rapid visual testing without setting up SSH or wireless pairing tools:
 
 1. Format a USB flash drive as **FAT32** or **NTFS**.
 2. Create a folder named `developer` in the root of the USB drive.
-3. Inside, create a subfolder named `apps` and unpack the production `dist/` build files into `developer/apps/usr/palm/applications/com.webos.iptv.pro/`.
+3. Inside, create a subfolder named `apps` and unpack the production `dist/` build files into `developer/apps/usr/palm/applications/com.theiptvplayer.pro/`.
 4. Insert the USB drive into your LG TV's USB port.
 5. On supported webOS developer builds or TVs running webOS Developer Mode, the USB application will appear in the home ribbon under the USB device icon.
 
@@ -427,7 +427,7 @@ While specifically packaged with webOS icons and `appinfo.json` for LG TVs, the 
 
 ## 🔒 Privacy & Security
 
-- **Zero Cloud Servers**: webOS IPTV Player Pro does not connect to any proprietary analytics or metrics servers.
+- **Zero Cloud Servers**: The IPTV Player PRO does not connect to any proprietary analytics or metrics servers.
 - **Direct Streaming**: Media streams connect directly from your TV to your IPTV provider.
 - **On-Device Storage**: Your playlist URLs, Xtream login credentials, favorites, and settings are saved securely in your TV's local storage.
 
