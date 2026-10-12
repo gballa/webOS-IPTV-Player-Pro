@@ -475,12 +475,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
       {/* Cinematic Dynamic Spotlight Hero */}
       {currentSpotlight && (
-        <section className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-[var(--tv-border)] bg-[#07090e] shadow-2xl min-h-[340px] sm:min-h-[380px] flex flex-col justify-end">
+        <section className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-[var(--tv-border)] bg-[#07090e] shadow-2xl min-h-[22rem] lg:min-h-[25rem] flex flex-col justify-end">
           {/* Full High-Fidelity Backdrop Image */}
           <div className="absolute inset-0 z-0">
             <img
               src={currentSpotlight.backdropUrl}
               alt={currentSpotlight.title}
+              onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }}
               className="w-full h-full object-cover object-center filter brightness-[0.4] transition-all duration-700"
             />
             {/* Smooth Cinematic Gradient Wash */}
@@ -490,8 +491,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
           {/* Dynamic Spotlight Glow */}
           <div
-            className="absolute top-0 right-0 w-80 sm:w-96 h-80 sm:h-96 rounded-full blur-3xl opacity-20 pointer-events-none"
-            style={{ backgroundColor: 'var(--tv-accent)' }}
+            className="absolute top-0 right-0 w-80 sm:w-96 h-80 sm:h-96 pointer-events-none opacity-25"
+            style={{
+              background: 'radial-gradient(circle at center, var(--tv-accent) 0%, transparent 70%)',
+            }}
           />
 
           {/* Hero Content Area */}
@@ -527,7 +530,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             {/* Progress Bar (if live show or continue watching) */}
             {currentSpotlight.progress !== undefined && (
               <div className="space-y-1.5 max-w-md pt-1">
-                <div className="flex items-center justify-between text-[11px] text-zinc-400 font-mono">
+                <div className="flex items-center justify-between text-[0.6875rem] text-zinc-400 font-mono">
                   <span>{currentSpotlight.type === 'live' ? 'Live On Air' : 'Playback'}</span>
                   <span className="text-[var(--tv-accent)] font-semibold">
                     {currentSpotlight.progress}% Elapsed
@@ -688,8 +691,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 <div className="text-xs font-black text-white group-hover:text-[var(--tv-accent)] transition-colors">
                   {tile.label}
                 </div>
-                <div className="text-[11px] font-semibold text-zinc-300">{tile.count}</div>
-                <p className="text-[10px] text-zinc-400 line-clamp-2 leading-relaxed">
+                <div className="text-[0.6875rem] font-semibold text-zinc-300">{tile.count}</div>
+                <p className="text-[0.625rem] text-zinc-400 line-clamp-2 leading-relaxed">
                   {tile.desc}
                 </p>
               </div>
@@ -727,45 +730,51 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             {recentChannels.slice(0, 2).map((ch) => {
               const prog = getProgramInfo(ch.id);
               return (
-                <div
+                <button
                   key={`rec-${ch.id}`}
                   onClick={() => onSelectChannel(ch, true)}
-                  className="tv-focusable p-3 rounded-xl bg-[var(--tv-bg-surface)] border border-[var(--tv-border)] hover:border-[var(--tv-accent)] cursor-pointer flex items-center space-x-3 transition-all"
+                  className="tv-focusable text-left p-3 rounded-xl bg-[var(--tv-bg-surface)] border border-[var(--tv-border)] hover:border-[var(--tv-accent)] cursor-pointer flex items-center space-x-3 transition-all"
                 >
                   <div className="w-11 h-11 rounded-lg bg-black/50 border border-white/10 p-1 flex items-center justify-center shrink-0">
                     {ch.logo ? (
-                      <img src={ch.logo} alt={ch.name} className="w-full h-full object-contain" />
+                      <img
+                        src={ch.logo}
+                        alt={ch.name}
+                        onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }}
+                        className="w-full h-full object-contain"
+                      />
                     ) : (
                       <Radio className="w-5 h-5 text-zinc-400" />
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center space-x-1.5 text-[10px] text-[var(--tv-accent)] font-mono font-bold">
+                    <div className="flex items-center space-x-1.5 text-[0.6875rem] text-[var(--tv-accent)] font-mono font-bold">
                       <span>#{ch.num}</span>
                       <span aria-hidden="true">·</span>
                       <span className="text-zinc-400 uppercase">{ch.group || 'Live'}</span>
                     </div>
                     <div className="text-xs font-bold text-white truncate">{ch.name}</div>
-                    <div className="text-[11px] text-zinc-300 truncate mt-0.5">
+                    <div className="text-[0.6875rem] text-zinc-300 truncate mt-0.5">
                       {prog.current?.title || 'Live Transmission'}
                     </div>
                   </div>
                   <Play className="w-4 h-4 text-[var(--tv-accent)] shrink-0" />
-                </div>
+                </button>
               );
             })}
 
             {/* Continue Watching VOD items */}
             {continueWatchingItems.slice(0, 2).map((item) => (
-              <div
+              <button
                 key={`cont-${item.id}`}
                 onClick={() => onSelectVod(item)}
-                className="tv-focusable group rounded-xl bg-[var(--tv-bg-surface)] border border-[var(--tv-border)] hover:border-[var(--tv-accent)] cursor-pointer flex items-center space-x-3 p-2.5 transition-all"
+                className="tv-focusable text-left group rounded-xl bg-[var(--tv-bg-surface)] border border-[var(--tv-border)] hover:border-[var(--tv-accent)] cursor-pointer flex items-center space-x-3 p-2.5 transition-all"
               >
                 <div className="w-16 h-11 rounded-lg bg-zinc-900 relative overflow-hidden shrink-0">
                   <img
                     src={item.backdrop || item.poster}
                     alt={item.title}
+                    onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                   />
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
@@ -774,7 +783,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="text-xs font-bold text-white truncate">{item.title}</div>
-                  <div className="text-[10px] text-zinc-400 flex items-center space-x-1.5 mt-0.5">
+                  <div className="text-[0.6875rem] text-zinc-400 flex items-center space-x-1.5 mt-0.5">
                     <span>{item.genre || 'Cinema'}</span>
                     <span aria-hidden="true">·</span>
                     <span className="text-[var(--tv-accent)]">{item.timeLeft}</span>
@@ -789,7 +798,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     />
                   </div>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </section>
@@ -833,22 +842,27 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             const isFav = favoriteIds.includes(ch.id);
 
             return (
-              <div
+              <button
                 key={ch.id}
                 onClick={() => onSelectChannel(ch, true)}
-                className="tv-focusable group relative p-3.5 rounded-xl bg-[var(--tv-bg-surface)] border border-[var(--tv-border)] hover:border-[var(--tv-accent)] cursor-pointer shadow-sm flex flex-col justify-between transition-all"
+                className="tv-focusable text-left group relative p-3.5 rounded-xl bg-[var(--tv-bg-surface)] border border-[var(--tv-border)] hover:border-[var(--tv-accent)] cursor-pointer shadow-sm flex flex-col justify-between transition-all"
               >
                 <div className="flex items-start justify-between space-x-2 mb-2">
                   <div className="flex items-center space-x-2.5 min-w-0">
                     <div className="w-9 h-9 rounded-lg bg-black/50 border border-white/10 p-1 flex items-center justify-center shrink-0 overflow-hidden">
                       {ch.logo ? (
-                        <img src={ch.logo} alt={ch.name} className="w-full h-full object-contain" />
+                        <img
+                          src={ch.logo}
+                          alt={ch.name}
+                          onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }}
+                          className="w-full h-full object-contain"
+                        />
                       ) : (
                         <Radio className="w-4 h-4 text-zinc-400" />
                       )}
                     </div>
                     <div className="min-w-0">
-                      <div className="text-[11px] font-mono text-[var(--tv-accent)] font-bold">
+                      <div className="text-[0.6875rem] font-mono text-[var(--tv-accent)] font-bold">
                         #{ch.num.toString().padStart(2, '0')}
                       </div>
                       <div className="text-xs font-bold text-white truncate">{ch.name}</div>
@@ -865,7 +879,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     {prog.current?.title || 'Live Transmission'}
                   </div>
                   {prog.next && (
-                    <div className="text-[10px] text-zinc-400 truncate">
+                    <div className="text-[0.625rem] text-zinc-400 truncate">
                       Next: {prog.next.title}
                     </div>
                   )}
@@ -882,14 +896,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   </div>
                 </div>
 
-                <div className="pt-2 flex items-center justify-between text-[11px] text-zinc-400">
+                <div className="pt-2 flex items-center justify-between text-[0.6875rem] text-zinc-400">
                   <span className="truncate">{ch.group || 'Live'}</span>
                   <span className="text-[var(--tv-accent)] font-semibold flex items-center space-x-1 group-hover:underline">
                     <span>Watch</span>
                     <Play className="w-3 h-3 fill-[var(--tv-accent)] inline" />
                   </span>
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>
@@ -919,16 +933,21 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {primeTimeHighlights.map(({ channel, program, timeStr, isFav }) => (
-              <div
+              <button
                 key={`prime-${program.id}`}
                 onClick={() => onSelectChannel(channel, true)}
-                className="tv-focusable p-3.5 rounded-xl bg-[var(--tv-bg-surface)] border border-[var(--tv-border)] hover:border-[var(--tv-accent)] cursor-pointer flex flex-col justify-between space-y-2 transition-all shadow-sm"
+                className="tv-focusable text-left p-3.5 rounded-xl bg-[var(--tv-bg-surface)] border border-[var(--tv-border)] hover:border-[var(--tv-accent)] cursor-pointer flex flex-col justify-between space-y-2 transition-all shadow-sm"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2 min-w-0">
                     <div className="w-6 h-6 rounded-md bg-black/40 border border-white/10 p-0.5 flex items-center justify-center shrink-0">
                       {channel.logo ? (
-                        <img src={channel.logo} alt={channel.name} className="w-full h-full object-contain" />
+                        <img
+                          src={channel.logo}
+                          alt={channel.name}
+                          onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }}
+                          className="w-full h-full object-contain"
+                        />
                       ) : (
                         <Radio className="w-3 h-3 text-zinc-400" />
                       )}
@@ -942,19 +961,19 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
                 <div className="space-y-0.5">
                   <div className="text-xs font-bold text-zinc-100 truncate">{program.title}</div>
-                  <p className="text-[11px] text-zinc-400 line-clamp-2 leading-relaxed">
+                  <p className="text-[0.6875rem] text-zinc-400 line-clamp-2 leading-relaxed">
                     {program.description}
                   </p>
                 </div>
 
-                <div className="pt-1 flex items-center justify-between text-[10px] text-zinc-400 border-t border-white/5">
+                <div className="pt-1 flex items-center justify-between text-[0.625rem] text-zinc-400 border-t border-white/5">
                   <span>{program.category || 'General'}</span>
                   <span className="text-[var(--tv-accent)] font-semibold flex items-center space-x-1">
                     <span>Tune In</span>
                     <ChevronRight className="w-3 h-3 inline" />
                   </span>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </section>
@@ -984,15 +1003,16 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5">
             {vodItems.slice(0, 4).map((vod) => (
-              <div
+              <button
                 key={`vod-grid-${vod.id}`}
                 onClick={() => onSelectVod(vod)}
-                className="tv-focusable group relative rounded-xl bg-[var(--tv-bg-surface)] border border-[var(--tv-border)] overflow-hidden cursor-pointer shadow-md hover:border-[var(--tv-accent)] transition-all flex flex-col"
+                className="tv-focusable text-left group relative rounded-xl bg-[var(--tv-bg-surface)] border border-[var(--tv-border)] overflow-hidden cursor-pointer shadow-md hover:border-[var(--tv-accent)] transition-all flex flex-col"
               >
                 <div className="aspect-video w-full bg-zinc-900 relative overflow-hidden">
                   <img
                     src={vod.backdrop || vod.poster}
                     alt={vod.title}
+                    onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -1003,7 +1023,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                       <Play className="w-4 h-4 fill-black text-black ml-0.5" />
                     </div>
                   </div>
-                  <div className="absolute top-2 right-2 px-2 py-0.5 rounded bg-black/70 backdrop-blur-md text-[10px] font-bold text-amber-400">
+                  <div className="absolute top-2 right-2 px-2 py-0.5 rounded bg-black/70 backdrop-blur-md text-[0.625rem] font-bold text-amber-400">
                     ★ {vod.rating || '8.5'}
                   </div>
                 </div>
@@ -1011,17 +1031,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 <div className="p-3 flex-1 flex flex-col justify-between space-y-1">
                   <div>
                     <div className="text-xs font-bold text-white truncate">{vod.title}</div>
-                    <div className="text-[11px] text-zinc-400 flex items-center space-x-1.5 mt-0.5">
+                    <div className="text-[0.6875rem] text-zinc-400 flex items-center space-x-1.5 mt-0.5">
                       <span>{vod.year || '2024'}</span>
                       <span aria-hidden="true">·</span>
                       <span className="truncate">{vod.genre || 'Cinema'}</span>
                     </div>
                   </div>
-                  <div className="text-[10px] text-zinc-400 line-clamp-1">
+                  <div className="text-[0.625rem] text-zinc-400 line-clamp-1">
                     {vod.plot || 'Mastered 4K HDR playback'}
                   </div>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </section>
@@ -1048,7 +1068,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </span>
         </div>
 
-        <div className="flex items-center space-x-3 text-zinc-400 font-mono text-[11px]">
+        <div className="flex items-center space-x-3 text-zinc-400 font-mono text-[0.6875rem]">
           <span>Numbers 0–9 direct channel jump</span>
           <span aria-hidden="true">·</span>
           <span>OK: Fullscreen</span>
@@ -1237,7 +1257,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             </div>
 
             <div className="p-3 rounded-xl bg-black/50 border border-white/10 text-left space-y-1">
-              <div className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">
+              <div className="text-[0.625rem] text-zinc-400 uppercase tracking-wider font-semibold">
                 Direct Mobile Browser URL:
               </div>
               <div className="font-mono text-xs text-[var(--tv-accent)] font-bold break-all">

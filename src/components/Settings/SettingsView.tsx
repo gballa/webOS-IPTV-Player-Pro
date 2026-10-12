@@ -2538,7 +2538,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           <div className="max-w-2xl space-y-6">
             <div className="flex items-center space-x-4 p-5 rounded-2xl bg-gradient-to-r from-white/[0.07] to-white/[0.02] border border-white/10">
               <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-2xl shrink-0 border border-white/20 bg-[#0d0f1a]">
-                <img src="/app-icon.svg" alt="The IPTV Player PRO Logo" className="w-full h-full object-cover" />
+                <img src="./app-icon.svg" alt="The IPTV Player PRO Logo" className="w-full h-full object-cover" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center space-x-2.5">

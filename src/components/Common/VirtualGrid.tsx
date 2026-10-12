@@ -4,7 +4,7 @@ interface VirtualGridProps<T> {
   items: T[];
   columns?: number;
   rowHeight: number;
-  viewportHeight: number;
+  viewportHeight?: number;
   renderItem: (item: T, index: number, isFocused: boolean) => React.ReactNode;
   focusedIndex?: number;
   overscanRows?: number;
@@ -16,7 +16,7 @@ export function VirtualGrid<T>({
   items,
   columns = 5,
   rowHeight,
-  viewportHeight,
+  viewportHeight: propViewportHeight,
   renderItem,
   focusedIndex = -1,
   overscanRows = 2,
@@ -25,7 +25,23 @@ export function VirtualGrid<T>({
 }: VirtualGridProps<T>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
+  const [containerHeight, setContainerHeight] = useState<number>(() => propViewportHeight || 600);
 
+  useEffect(() => {
+    const updateSize = () => {
+      if (containerRef.current) {
+        const clientH = containerRef.current.clientHeight;
+        if (clientH > 0) {
+          setContainerHeight(clientH);
+        }
+      }
+    };
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
+
+  const activeViewportHeight = containerHeight || propViewportHeight || 600;
   const totalRows = Math.ceil(items.length / columns);
   const totalHeight = totalRows * rowHeight;
 
@@ -35,22 +51,22 @@ export function VirtualGrid<T>({
       const rowIndex = Math.floor(focusedIndex / columns);
       const targetTop = rowIndex * rowHeight;
       const currentScroll = containerRef.current.scrollTop;
-      const viewBottom = currentScroll + viewportHeight;
+      const viewBottom = currentScroll + activeViewportHeight;
 
       if (targetTop < currentScroll) {
         containerRef.current.scrollTop = targetTop;
       } else if (targetTop + rowHeight > viewBottom) {
-        containerRef.current.scrollTop = targetTop + rowHeight - viewportHeight;
+        containerRef.current.scrollTop = targetTop + rowHeight - activeViewportHeight;
       }
     }
-  }, [focusedIndex, columns, rowHeight, viewportHeight]);
+  }, [focusedIndex, columns, rowHeight, activeViewportHeight]);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     setScrollTop(e.currentTarget.scrollTop);
   };
 
   const startRow = Math.max(0, Math.floor(scrollTop / rowHeight) - overscanRows);
-  const endRow = Math.min(totalRows - 1, Math.ceil((scrollTop + viewportHeight) / rowHeight) + overscanRows);
+  const endRow = Math.min(totalRows - 1, Math.ceil((scrollTop + activeViewportHeight) / rowHeight) + overscanRows);
 
   const visibleRows = useMemo(() => {
     const rows = [];
@@ -81,8 +97,8 @@ export function VirtualGrid<T>({
     <div
       ref={containerRef}
       onScroll={handleScroll}
-      className={`overflow-y-auto relative ${className}`}
-      style={{ height: viewportHeight, contain: 'strict' }}
+      className={`overflow-y-auto relative w-full h-full ${className}`}
+      style={{ contain: 'strict' }}
     >
       <div style={{ height: totalHeight, width: '100%', position: 'relative' }}>
         {visibleRows.map(({ rowIndex, offsetTop, items: rowItems }) => (

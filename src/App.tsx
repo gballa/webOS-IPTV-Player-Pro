@@ -298,10 +298,23 @@ export default function App() {
     setIsFullscreenPlayer(true);
   }, []);
 
+  // Set initial remote focus on startup and on view changes
+  useEffect(() => {
+    if (!isFullscreenPlayer) {
+      const timer = setTimeout(() => {
+        globalRemote.focusInitialElement();
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [activeTab, isFullscreenPlayer]);
+
   // Global remote control handler
   useEffect(() => {
     const unsubscribe = globalRemote.subscribe((event: RemoteEvent) => {
-      if (isFullscreenPlayer) return;
+      if (isFullscreenPlayer) {
+        event.stopDefaultNavigation?.();
+        return;
+      }
 
       switch (event.action) {
         case 'RED':

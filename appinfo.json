@@ -11,5 +11,6 @@
   "disableBackHistoryAPI": true,
   "supportGpu": true,
   "allowAudioPassthrough": true,
-  "bgColor": "#0a0a0c"
+  "bgColor": "#0a0a0c",
+  "requiredACG": []
 }

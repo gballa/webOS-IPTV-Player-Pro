@@ -97,15 +97,15 @@ export const OSD: React.FC<OSDProps> = ({
             <div className="flex items-center space-x-3 text-xs text-zinc-300 mt-0.5">
               <span className="font-semibold text-zinc-400">{channel.group}</span>
               <span>•</span>
-              <span className="px-2 py-0.5 rounded bg-white/10 font-bold text-white uppercase text-[10px]">
+              <span className="px-2 py-0.5 rounded bg-white/10 font-bold text-white uppercase text-[0.625rem]">
                 {channel.resolution || '1080p'}
               </span>
               {channel.hdr && channel.hdr !== 'SDR' && (
-                <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-[10px]">
+                <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-[0.625rem]">
                   {channel.hdr}
                 </span>
               )}
-              <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold text-[10px]">
+              <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold text-[0.625rem]">
                 {metrics?.engine || 'Native HTML5'}
               </span>
             </div>
@@ -147,7 +147,7 @@ export const OSD: React.FC<OSDProps> = ({
             <div className="flex items-center space-x-2 text-xs text-cyan-400 font-bold uppercase tracking-wider mb-1">
               <span>NOW PLAYING</span>
               {currentProgram?.category && (
-                <span className="px-1.5 py-0.2 rounded bg-cyan-400/20 text-cyan-300 text-[10px]">
+                <span className="px-1.5 py-0.2 rounded bg-cyan-400/20 text-cyan-300 text-[0.625rem]">
                   {currentProgram.category}
                 </span>
               )}
@@ -163,7 +163,7 @@ export const OSD: React.FC<OSDProps> = ({
 
           {nextProgram && (
             <div className="text-right text-xs max-w-xs pl-4 border-l border-white/10">
-              <span className="text-[10px] uppercase font-bold text-zinc-400 block mb-0.5">UP NEXT</span>
+              <span className="text-[0.625rem] uppercase font-bold text-zinc-400 block mb-0.5">UP NEXT</span>
               <div className="font-semibold text-zinc-200 truncate">{nextProgram.title}</div>
             </div>
           )}
@@ -177,7 +177,7 @@ export const OSD: React.FC<OSDProps> = ({
               style={{ width: `${nowProgress}%` }}
             ></div>
           </div>
-          <div className="flex justify-between text-[11px] font-mono text-zinc-400">
+          <div className="flex justify-between text-[0.6875rem] font-mono text-zinc-400">
             <span>
               {isDvrActive ? formatSecs(currentTime) : 'Live Progress'} ({nowProgress}%)
             </span>

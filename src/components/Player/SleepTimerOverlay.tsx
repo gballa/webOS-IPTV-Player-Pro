@@ -45,7 +45,7 @@ export const SleepTimerOverlay: React.FC<SleepTimerOverlayProps> = ({
           title="Sleep Timer Active (Click to adjust)"
         >
           <Moon className={`w-3.5 h-3.5 ${isWarning ? 'text-amber-300' : 'text-[var(--tv-accent)]'}`} />
-          <span className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">Sleep</span>
+          <span className="text-[0.625rem] uppercase font-bold text-zinc-400 tracking-wider">Sleep</span>
           <span className="font-mono text-xs font-black text-white">{formatRemaining(remainingSeconds)}</span>
         </button>
       </div>
@@ -63,7 +63,7 @@ export const SleepTimerOverlay: React.FC<SleepTimerOverlayProps> = ({
               <div className="text-xs font-extrabold text-amber-300">
                 Sleep Timer Expiring in {remainingSeconds}s
               </div>
-              <div className="text-[11px] text-zinc-300">Player will turn off automatically.</div>
+              <div className="text-[0.6875rem] text-zinc-300">Player will turn off automatically.</div>
             </div>
             <button
               onClick={() => onSetTimerMinutes(30)}
@@ -98,7 +98,7 @@ export const SleepTimerOverlay: React.FC<SleepTimerOverlayProps> = ({
                 </div>
                 <div>
                   <h3 className="text-sm font-black text-white">Sleep Timer</h3>
-                  <p className="text-[11px] text-zinc-400">Scheduled playback shutoff</p>
+                  <p className="text-[0.6875rem] text-zinc-400">Scheduled playback shutoff</p>
                 </div>
               </div>
               <button
@@ -110,7 +110,7 @@ export const SleepTimerOverlay: React.FC<SleepTimerOverlayProps> = ({
             </div>
 
             <div className="text-center py-2 bg-black/40 rounded-2xl border border-white/5">
-              <div className="text-[11px] uppercase tracking-wider text-zinc-400 font-bold mb-0.5">
+              <div className="text-[0.6875rem] uppercase tracking-wider text-zinc-400 font-bold mb-0.5">
                 Time Remaining
               </div>
               <div className="text-3xl font-black font-mono text-[var(--tv-accent)]">
@@ -120,7 +120,7 @@ export const SleepTimerOverlay: React.FC<SleepTimerOverlayProps> = ({
 
             {/* Presets Grid */}
             <div className="space-y-1.5">
-              <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
+              <div className="text-[0.6875rem] font-bold text-zinc-400 uppercase tracking-wider">
                 Select Duration
               </div>
               <div className="grid grid-cols-3 gap-2">

@@ -25,15 +25,20 @@ export const EpgGuide: React.FC<EpgGuideProps> = ({
   const [reminderSet, setReminderSet] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewportHeight, setViewportHeight] = useState(600);
+  const [rootFs, setRootFs] = useState(16);
 
   useEffect(() => {
     const handleResize = () => {
       setViewportHeight(Math.max(400, window.innerHeight - 200));
+      const fs = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      if (!isNaN(fs) && fs > 0) setRootFs(fs);
     };
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  const itemHeight = Math.round(3.875 * rootFs);
 
   const filteredChannels = useMemo(() => {
     if (!searchQuery.trim()) return channels;
@@ -143,13 +148,13 @@ export const EpgGuide: React.FC<EpgGuideProps> = ({
   return (
     <div className="flex-1 flex overflow-hidden bg-[#0a0a0c]">
       {/* Pane 1 (Left): Channels List */}
-      <div className="w-80 border-r border-white/10 bg-[#0f0f14]/80 p-3.5 flex flex-col shrink-0">
+      <div className="w-[var(--tv-sidebar-width,20rem)] border-r border-white/10 bg-[#0f0f14]/80 p-3.5 flex flex-col shrink-0">
         <div className="flex items-center justify-between mb-3 px-1">
           <div className="flex items-center space-x-2 text-xs font-bold text-zinc-400 uppercase tracking-wider">
             <Calendar className="w-4 h-4 text-[var(--tv-accent)]" />
             <span>Channels Schedule</span>
           </div>
-          <span className="text-[11px] font-mono font-bold text-[var(--tv-accent)]">
+          <span className="text-[0.6875rem] font-mono font-bold text-[var(--tv-accent)]">
             {filteredChannels.length}
           </span>
         </div>
@@ -174,7 +179,7 @@ export const EpgGuide: React.FC<EpgGuideProps> = ({
           ) : (
             <VirtualList
               items={filteredChannels}
-              itemHeight={62}
+              itemHeight={itemHeight}
               viewportHeight={viewportHeight}
               overscan={4}
               getItemKey={(ch) => ch.id}
@@ -185,7 +190,7 @@ export const EpgGuide: React.FC<EpgGuideProps> = ({
                   <button
                     key={ch.id}
                     onClick={() => setSelectedChannelId(ch.id)}
-                    className={`tv-focusable w-full h-[58px] p-2.5 my-[2px] rounded-xl text-left flex items-center justify-between border transition-all ${
+                    className={`tv-focusable w-full h-[3.625rem] p-2.5 my-[0.125rem] rounded-xl text-left flex items-center justify-between border transition-all ${
                       isSelected
                         ? 'bg-[var(--tv-accent)] text-black border-[var(--tv-accent)] shadow-md shadow-[var(--tv-accent-glow)] font-bold'
                         : 'bg-white/5 border-white/5 text-zinc-300 hover:bg-white/10 hover:text-white'
@@ -202,7 +207,7 @@ export const EpgGuide: React.FC<EpgGuideProps> = ({
                       <div className="truncate min-w-0">
                         <div className="text-xs font-bold truncate leading-tight">{ch.name}</div>
                         <div
-                          className={`text-[10px] truncate ${
+                          className={`text-[0.6875rem] truncate ${
                             isSelected ? 'text-black/80' : 'text-zinc-500'
                           }`}
                         >
@@ -269,20 +274,20 @@ export const EpgGuide: React.FC<EpgGuideProps> = ({
                     </div>
 
                     {isCurrentlyAiring && (
-                      <span className="px-2 py-0.5 rounded bg-red-600/30 border border-red-500 text-red-400 text-[10px] font-black uppercase tracking-wider animate-pulse">
+                      <span className="px-2 py-0.5 rounded bg-red-600/30 border border-red-500 text-red-400 text-[0.625rem] font-black uppercase tracking-wider animate-pulse">
                         LIVE NOW
                       </span>
                     )}
 
                     {isPast && (
-                      <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30 text-[10px] font-bold">
+                      <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30 text-[0.625rem] font-bold">
                         Catch-Up Available
                       </span>
                     )}
                   </div>
 
                   {prog.category && (
-                    <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">
+                    <span className="text-[0.625rem] font-semibold text-zinc-400 uppercase tracking-wider">
                       {prog.category}
                     </span>
                   )}
@@ -297,7 +302,7 @@ export const EpgGuide: React.FC<EpgGuideProps> = ({
       </div>
 
       {/* Pane 3 (Right): Program Detail & Action Pane */}
-      <div className="w-96 border-l border-white/10 bg-[#0f0f14]/90 p-6 flex flex-col justify-between shrink-0">
+      <div className="w-[var(--tv-preview-width,24rem)] border-l border-white/10 bg-[#0f0f14]/90 p-6 flex flex-col justify-between shrink-0">
         {selectedProgram ? (
           <>
             <div className="space-y-4">

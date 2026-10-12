@@ -23,6 +23,7 @@ if (!fs.existsSync('dist')) {
 fs.copyFileSync('appinfo.json', 'dist/appinfo.json');
 if (fs.existsSync('icon.png')) fs.copyFileSync('icon.png', 'dist/icon.png');
 if (fs.existsSync('largeIcon.png')) fs.copyFileSync('largeIcon.png', 'dist/largeIcon.png');
+if (fs.existsSync('app-icon.svg')) fs.copyFileSync('app-icon.svg', 'dist/app-icon.svg');
 
 // Check if official ares-package is available
 let aresAvailable = false;
@@ -35,10 +36,17 @@ try {
 
 if (aresAvailable) {
   console.log('[Packager] Using system ares-package tool...');
-  execSync(`ares-package dist -o . --no-minify`, { stdio: 'inherit' });
-  console.log(`[Packager] Successfully generated ${IPK_NAME} using ares-package!`);
-} else {
-  console.log('[Packager] Using native compliant Debian AR packager with valid webOS timestamps...');
+  const srv = fs.existsSync('bundled-service') ? 'bundled-service' : '';
+  try {
+    execSync(`ares-package dist ${srv} -o .`, { stdio: 'inherit' });
+    console.log(`[Packager] Successfully generated ${IPK_NAME} using ares-package!`);
+    process.exit(0);
+  } catch (err) {
+    console.warn('[Packager] ares-package failed, falling back to native Debian AR packager...', err.message);
+  }
+}
+
+console.log('[Packager] Using native compliant Debian AR packager with valid webOS timestamps...');
 
   const stageDir = path.resolve('.ipk_staging');
   if (fs.existsSync(stageDir)) {
@@ -123,4 +131,4 @@ Description: The IPTV Player PRO - High-performance IPTV player for LG webOS TVs
 
   const finalSize = (fs.statSync(IPK_NAME).size / 1024).toFixed(1);
   console.log(`[Packager] Build complete: ${IPK_NAME} (${finalSize} KB) [The IPTV Player PRO - Debian AR format]`);
-}
+

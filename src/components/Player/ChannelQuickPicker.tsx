@@ -23,9 +23,20 @@ export const ChannelQuickPicker: React.FC<ChannelQuickPickerProps> = ({
   if (!isOpen) return null;
 
   const currentIdx = channels.findIndex(c => c.id === currentChannelId);
+  const [rootFs, setRootFs] = React.useState(16);
+
+  React.useEffect(() => {
+    const updateFs = () => {
+      const fs = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      if (!isNaN(fs) && fs > 0) setRootFs(fs);
+    };
+    updateFs();
+    window.addEventListener('resize', updateFs);
+    return () => window.removeEventListener('resize', updateFs);
+  }, []);
 
   return (
-    <div className="fixed inset-y-0 left-0 w-96 z-50 bg-[#0e0e13]/95 backdrop-blur-xl border-r border-white/10 p-6 flex flex-col shadow-2xl">
+    <div className="fixed inset-y-0 left-0 w-[clamp(18rem,24vw,28rem)] z-50 bg-[#0e0e13]/95 backdrop-blur-xl border-r border-white/10 p-6 flex flex-col shadow-2xl">
       <div className="flex items-center justify-between pb-4 border-b border-white/10">
         <div className="flex items-center space-x-2">
           <Radio className="w-5 h-5 text-[var(--tv-accent)]" />
@@ -39,10 +50,10 @@ export const ChannelQuickPicker: React.FC<ChannelQuickPickerProps> = ({
         </button>
       </div>
 
-      <div className="flex-1 mt-4">
+      <div className="flex-1 mt-4 overflow-hidden">
         <VirtualList
           items={channels}
-          itemHeight={64}
+          itemHeight={Math.round(4 * rootFs)}
           viewportHeight={600}
           focusedIndex={currentIdx}
           renderItem={(ch, _, isFocused) => {
@@ -69,7 +80,7 @@ export const ChannelQuickPicker: React.FC<ChannelQuickPickerProps> = ({
                   </span>
                   <div className="min-w-0 flex-1 overflow-hidden leading-tight">
                     <div className="text-sm truncate whitespace-nowrap font-bold">{ch.name}</div>
-                    <div className={`text-[10px] truncate whitespace-nowrap mt-0.5 ${isCurrent ? 'text-black/80' : 'text-zinc-400'}`}>
+                    <div className={`text-[0.6875rem] truncate whitespace-nowrap mt-0.5 ${isCurrent ? 'text-black/80' : 'text-zinc-400'}`}>
                       {ch.group}
                     </div>
                   </div>
@@ -77,7 +88,7 @@ export const ChannelQuickPicker: React.FC<ChannelQuickPickerProps> = ({
 
                 <div className="flex items-center space-x-2 shrink-0">
                   {ch.resolution === '4K' && (
-                    <span className="px-1.5 py-0.5 rounded bg-black/30 text-[9px] font-black uppercase">
+                    <span className="px-1.5 py-0.5 rounded bg-black/30 text-[0.625rem] font-black uppercase">
                       4K
                     </span>
                   )}

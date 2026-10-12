@@ -365,42 +365,58 @@ export const ChannelBrowser: React.FC<ChannelBrowserProps> = ({
         case 'LEFT':
           if (activePane === 'channels') {
             setActivePane('groups');
+            event.stopDefaultNavigation?.();
           }
           break;
         case 'RIGHT':
           if (activePane === 'groups') {
             setActivePane('channels');
+            event.stopDefaultNavigation?.();
           }
           break;
         case 'UP':
           if (activePane === 'groups') {
-            setGroupIndex((prev) => {
-              const next = Math.max(0, prev - 1);
-              setSelectedGroup(groups[next]);
-              setFocusedIndex(0);
-              return next;
-            });
+            if (groupIndex > 0) {
+              setGroupIndex((prev) => {
+                const next = Math.max(0, prev - 1);
+                setSelectedGroup(groups[next]);
+                setFocusedIndex(0);
+                return next;
+              });
+              event.stopDefaultNavigation?.();
+            }
           } else {
-            setFocusedIndex((prev) => Math.max(0, prev - 1));
+            if (focusedIndex > 0) {
+              setFocusedIndex((prev) => Math.max(0, prev - 1));
+              event.stopDefaultNavigation?.();
+            }
           }
           break;
         case 'DOWN':
           if (activePane === 'groups') {
-            setGroupIndex((prev) => {
-              const next = Math.min(groups.length - 1, prev + 1);
-              setSelectedGroup(groups[next]);
-              setFocusedIndex(0);
-              return next;
-            });
+            if (groupIndex < groups.length - 1) {
+              setGroupIndex((prev) => {
+                const next = Math.min(groups.length - 1, prev + 1);
+                setSelectedGroup(groups[next]);
+                setFocusedIndex(0);
+                return next;
+              });
+              event.stopDefaultNavigation?.();
+            }
           } else {
-            setFocusedIndex((prev) => Math.min(filteredChannels.length - 1, prev + 1));
+            if (focusedIndex < filteredChannels.length - 1) {
+              setFocusedIndex((prev) => Math.min(filteredChannels.length - 1, prev + 1));
+              event.stopDefaultNavigation?.();
+            }
           }
           break;
         case 'CH_UP':
           setFocusedIndex((prev) => Math.max(0, prev - 50));
+          event.stopDefaultNavigation?.();
           break;
         case 'CH_DOWN':
           setFocusedIndex((prev) => Math.min(filteredChannels.length - 1, prev + 50));
+          event.stopDefaultNavigation?.();
           break;
         case 'ENTER':
           if (dialBuffer) {
@@ -511,15 +527,26 @@ export const ChannelBrowser: React.FC<ChannelBrowserProps> = ({
     return map;
   }, [channels]);
 
-  // Exact fixed item height for strict virtualization performance
-  // Compact: 56px (generous vertical clearance to prevent any overlapping text)
-  // Comfortable: 74px (expanded 10-foot TV viewing)
-  const itemHeight = density === 'compact' ? 56 : 74;
+  // Fluid responsive item height based on root font size
+  // Compact: 3.5rem (56px at 16px baseline, 112px at 4K)
+  // Comfortable: 4.625rem (74px at 16px baseline, 148px at 4K)
+  const [rootFs, setRootFs] = useState(16);
+  useEffect(() => {
+    const updateFs = () => {
+      const fs = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      if (!isNaN(fs) && fs > 0) setRootFs(fs);
+    };
+    updateFs();
+    window.addEventListener('resize', updateFs);
+    return () => window.removeEventListener('resize', updateFs);
+  }, []);
+
+  const itemHeight = Math.round((density === 'compact' ? 3.5 : 4.625) * rootFs);
 
   return (
     <div className="flex-1 flex overflow-hidden bg-[var(--tv-bg-primary)] select-none">
       {/* 1. Left Sidebar: Channel Groups */}
-      <div className="w-64 border-r border-[var(--tv-border)] bg-[var(--tv-bg-surface)] p-3.5 flex flex-col shrink-0">
+      <div className="w-[var(--tv-sidebar-width,16rem)] border-r border-[var(--tv-border)] bg-[var(--tv-bg-surface)] p-3.5 flex flex-col shrink-0">
         {/* Search Input */}
         <div className="relative mb-3">
           <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -537,7 +564,7 @@ export const ChannelBrowser: React.FC<ChannelBrowserProps> = ({
 
         {/* Group list */}
         <div className="flex-1 overflow-y-auto space-y-1 pr-1">
-          <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider px-2 py-1 flex items-center space-x-1.5">
+          <div className="text-[0.6875rem] font-bold text-zinc-400 uppercase tracking-wider px-2 py-1 flex items-center space-x-1.5">
             <Layers className="w-3 h-3 text-[var(--tv-accent)]" />
             <span>Categories ({groups.length})</span>
           </div>
@@ -550,6 +577,7 @@ export const ChannelBrowser: React.FC<ChannelBrowserProps> = ({
             return (
               <button
                 key={group}
+                ref={isFocusedGroup ? (el) => { el?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } : undefined}
                 onClick={() => {
                   if (locked) {
                     setPendingLockTarget(group);
@@ -585,12 +613,12 @@ export const ChannelBrowser: React.FC<ChannelBrowserProps> = ({
                 </div>
                 <div className="flex items-center space-x-1.5 shrink-0">
                   {locked && (
-                    <span className="text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-bold uppercase">
+                    <span className="text-[0.625rem] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-bold uppercase">
                       Lock
                     </span>
                   )}
                   <span
-                    className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+                    className={`text-[0.6875rem] px-1.5 py-0.2 rounded font-mono ${
                       isSelected ? 'bg-black/20 text-black font-bold' : 'text-zinc-400'
                     }`}
                   >
@@ -603,7 +631,7 @@ export const ChannelBrowser: React.FC<ChannelBrowserProps> = ({
         </div>
 
         {/* Remote Guide Footer */}
-        <div className="pt-2.5 border-t border-[var(--tv-border)] text-[10px] text-zinc-400 space-y-1">
+        <div className="pt-2.5 border-t border-[var(--tv-border)] text-[0.6875rem] text-zinc-400 space-y-1">
           <div className="flex items-center space-x-2">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--tv-accent)]" />
             <span>← / → Switch Groups & Streams</span>
@@ -795,7 +823,8 @@ export const ChannelBrowser: React.FC<ChannelBrowserProps> = ({
                         setFocusedIndex(idx);
                         setActivePane('channels');
                       }}
-                      className={`tv-focusable mx-1 h-[50px] my-[2px] rounded-xl px-3 py-1 flex flex-col justify-center cursor-pointer border transition-all duration-150 relative overflow-hidden select-none ${
+                      ref={isFocused ? (el) => { el?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } : undefined}
+                      className={`tv-focusable mx-1 h-[3.125rem] my-[0.125rem] rounded-xl px-3 py-1 flex flex-col justify-center cursor-pointer border transition-all duration-150 relative overflow-hidden select-none ${
                         isFocused
                           ? 'bg-[var(--tv-accent-subtle)] border-[var(--tv-accent)] shadow-lg shadow-[var(--tv-accent-glow)] ring-1 ring-[var(--tv-accent)]'
                           : isCurrent
@@ -813,7 +842,7 @@ export const ChannelBrowser: React.FC<ChannelBrowserProps> = ({
                       <div className="flex items-center justify-between min-w-0 w-full overflow-hidden leading-tight">
                         {/* Left: Number, Station Logo, Name & Live Indicator */}
                         <div className="flex items-center space-x-2 min-w-0 flex-1 pr-2 overflow-hidden">
-                          <span className="font-mono text-[11px] font-black text-[var(--tv-accent)] w-7 text-right shrink-0 whitespace-nowrap">
+                          <span className="font-mono text-[0.6875rem] font-black text-[var(--tv-accent)] w-7 text-right shrink-0 whitespace-nowrap">
                             #{ch.num.toString().padStart(2, '0')}
                           </span>
 
@@ -828,13 +857,13 @@ export const ChannelBrowser: React.FC<ChannelBrowserProps> = ({
                           </span>
 
                           {isLockedChannel && (
-                            <span className="flex items-center space-x-1 text-[8.5px] font-bold text-amber-300 shrink-0 px-1.5 py-0.2 rounded bg-amber-500/20 border border-amber-500/30 whitespace-nowrap">
+                            <span className="flex items-center space-x-1 text-[0.5625rem] font-bold text-amber-300 shrink-0 px-1.5 py-0.2 rounded bg-amber-500/20 border border-amber-500/30 whitespace-nowrap">
                               <Lock className="w-2.5 h-2.5" />
                               <span>LOCKED</span>
                             </span>
                           )}
 
-                          <span className="text-[9px] text-zinc-400 bg-white/5 border border-white/5 px-1 rounded truncate whitespace-nowrap max-w-[80px] shrink-0 hidden 2xl:inline">
+                          <span className="text-[0.625rem] text-zinc-400 bg-white/5 border border-white/5 px-1 rounded truncate whitespace-nowrap max-w-[80px] shrink-0 hidden 2xl:inline">
                             {ch.group}
                           </span>
                         </div>
@@ -918,7 +947,8 @@ export const ChannelBrowser: React.FC<ChannelBrowserProps> = ({
                       setFocusedIndex(idx);
                       setActivePane('channels');
                     }}
-                    className={`tv-focusable mx-1 h-[68px] my-[2px] rounded-xl p-2.5 flex items-center justify-between cursor-pointer border transition-all duration-150 relative overflow-hidden select-none ${
+                    ref={isFocused ? (el) => { el?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } : undefined}
+                    className={`tv-focusable mx-1 h-[4.25rem] my-[0.125rem] rounded-xl p-2.5 flex items-center justify-between cursor-pointer border transition-all duration-150 relative overflow-hidden select-none ${
                       isFocused
                         ? 'bg-[var(--tv-accent-subtle)] border-[var(--tv-accent)] shadow-lg shadow-[var(--tv-accent-glow)] ring-1 ring-[var(--tv-accent)]'
                         : isCurrent
@@ -950,17 +980,17 @@ export const ChannelBrowser: React.FC<ChannelBrowserProps> = ({
                             {ch.name}
                           </span>
                           {isLockedChannel && (
-                            <span className="flex items-center space-x-1 text-[8.5px] font-bold text-amber-300 shrink-0 px-1.5 py-0.2 rounded bg-amber-500/20 border border-amber-500/30 whitespace-nowrap">
+                            <span className="flex items-center space-x-1 text-[0.5625rem] font-bold text-amber-300 shrink-0 px-1.5 py-0.2 rounded bg-amber-500/20 border border-amber-500/30 whitespace-nowrap">
                               <Lock className="w-2.5 h-2.5" />
                               <span>LOCKED</span>
                             </span>
                           )}
-                          <span className="text-[10px] text-zinc-400 bg-white/5 border border-white/5 px-1.5 py-0.2 rounded truncate whitespace-nowrap max-w-[90px] shrink-0 hidden 2xl:inline">
+                          <span className="text-[0.6875rem] text-zinc-400 bg-white/5 border border-white/5 px-1.5 py-0.2 rounded truncate whitespace-nowrap max-w-[90px] shrink-0 hidden 2xl:inline">
                             {ch.group}
                           </span>
                         </div>
 
-                        <div className="flex items-center space-x-2 text-[10px] text-zinc-400 min-w-0 overflow-hidden leading-snug">
+                        <div className="flex items-center space-x-2 text-[0.6875rem] text-zinc-400 min-w-0 overflow-hidden leading-snug">
                           {schedule.curProg ? (
                             <>
                               <span className="text-zinc-200 font-semibold truncate whitespace-nowrap min-w-0 flex-1">
@@ -1016,7 +1046,7 @@ export const ChannelBrowser: React.FC<ChannelBrowserProps> = ({
 
       {/* 3. Right: Live Preview Pane & Technical Stream Inspector */}
       {showLivePreview && focusedChannel && (
-        <div className="w-80 border-l border-[var(--tv-border)] bg-[var(--tv-bg-surface)] p-4 flex flex-col shrink-0 overflow-y-auto">
+        <div className="w-[var(--tv-preview-width,20rem)] border-l border-[var(--tv-border)] bg-[var(--tv-bg-surface)] p-4 flex flex-col shrink-0 overflow-y-auto">
           <div className="flex items-center justify-between mb-2.5">
             <div className="flex items-center space-x-1.5 text-xs font-bold uppercase tracking-wider text-[var(--tv-accent)]">
               <Eye className="w-3.5 h-3.5" />

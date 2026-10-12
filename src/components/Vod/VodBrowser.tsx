@@ -52,6 +52,13 @@ export const VodBrowser: React.FC<VodBrowserProps> = ({
   const [focusedIndex, setFocusedIndex] = useState(0);
   const [viewportHeight, setViewportHeight] = useState(650);
   const [gridColumns, setGridColumns] = useState(5);
+  const [rootFs, setRootFs] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const fs = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      return isNaN(fs) ? 16 : fs;
+    }
+    return 16;
+  });
 
   // Parental controls unlocked VOD items session cache
   const [unlockedVodIds, setUnlockedVodIds] = useState<Set<string>>(new Set());
@@ -117,7 +124,7 @@ export const VodBrowser: React.FC<VodBrowserProps> = ({
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Dynamic viewport sizing
+  // Dynamic viewport sizing & fluid root font scaling
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
@@ -127,7 +134,11 @@ export const VodBrowser: React.FC<VodBrowserProps> = ({
       else if (width >= 640) setGridColumns(3);
       else setGridColumns(2);
 
-      setViewportHeight(Math.max(450, window.innerHeight - 170));
+      const fs = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      const currentFs = (!isNaN(fs) && fs > 0) ? fs : 16;
+      setRootFs(currentFs);
+
+      setViewportHeight(Math.max(450, window.innerHeight - Math.round(10.625 * currentFs)));
     };
     handleResize();
     window.addEventListener('resize', handleResize);
@@ -252,7 +263,7 @@ export const VodBrowser: React.FC<VodBrowserProps> = ({
   return (
     <div className="flex-1 flex overflow-hidden bg-[var(--tv-bg-primary)] select-none">
       {/* 1. Left Sidebar: Categories & Genres */}
-      <div className="w-64 border-r border-[var(--tv-border)] bg-[var(--tv-bg-surface)] p-3.5 flex flex-col shrink-0">
+      <div className="w-[var(--tv-sidebar-width,16rem)] border-r border-[var(--tv-border)] bg-[var(--tv-bg-surface)] p-3.5 flex flex-col shrink-0">
         {/* Toggle Movies vs TV Series */}
         <div className="grid grid-cols-2 gap-1.5 p-1 bg-white/5 border border-white/10 rounded-xl mb-3">
           <button
@@ -310,7 +321,7 @@ export const VodBrowser: React.FC<VodBrowserProps> = ({
 
         {/* Genre / Category List */}
         <div className="flex-1 overflow-y-auto space-y-1 pr-1">
-          <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider px-2 py-1 flex items-center space-x-1.5">
+          <div className="text-[0.6875rem] font-bold text-zinc-400 uppercase tracking-wider px-2 py-1 flex items-center space-x-1.5">
             <Layers className="w-3 h-3 text-[var(--tv-accent)]" />
             <span>Genres & Collections ({genres.length})</span>
           </div>
@@ -334,7 +345,7 @@ export const VodBrowser: React.FC<VodBrowserProps> = ({
               >
                 <span className="truncate">{genre === 'ALL' ? 'All Titles' : genre}</span>
                 <span
-                  className={`text-[10px] px-1.5 py-0.5 rounded font-mono ${
+                  className={`text-[0.6875rem] px-1.5 py-0.5 rounded font-mono ${
                     isSelected ? 'bg-black/20 text-black font-bold' : 'text-zinc-400'
                   }`}
                 >
@@ -346,7 +357,7 @@ export const VodBrowser: React.FC<VodBrowserProps> = ({
         </div>
 
         {/* Remote guide */}
-        <div className="pt-2.5 border-t border-[var(--tv-border)] text-[10px] text-zinc-400 space-y-1">
+        <div className="pt-2.5 border-t border-[var(--tv-border)] text-[0.6875rem] text-zinc-400 space-y-1">
           <div className="flex items-center space-x-2">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--tv-accent)]" />
             <span>Enter: View Details / Seasons</span>
@@ -392,7 +403,7 @@ export const VodBrowser: React.FC<VodBrowserProps> = ({
                 </>
               ) : (
                 <>
-                  <span className="px-1 py-0.2 rounded bg-[#f5c518] text-black font-black text-[9px] leading-none">
+                  <span className="px-1 py-0.2 rounded bg-[#f5c518] text-black font-black text-[0.625rem] leading-none">
                     IMDb
                   </span>
                   <span>Fetch Info</span>
@@ -416,7 +427,7 @@ export const VodBrowser: React.FC<VodBrowserProps> = ({
             <VirtualGrid
               items={filteredItems}
               columns={gridColumns}
-              rowHeight={310}
+              rowHeight={Math.round(19.375 * rootFs)}
               viewportHeight={viewportHeight}
               focusedIndex={focusedIndex}
               getItemKey={(item) => item.id}
@@ -451,9 +462,10 @@ export const VodBrowser: React.FC<VodBrowserProps> = ({
                       {posterUrl ? (
                         <img
                           src={posterUrl}
-                          alt={item.title}
+                          alt=""
                           loading="lazy"
                           referrerPolicy="no-referrer"
+                          onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (
@@ -463,7 +475,7 @@ export const VodBrowser: React.FC<VodBrowserProps> = ({
                           ) : (
                             <Clapperboard className="w-10 h-10 mb-1" />
                           )}
-                          <span className="text-[10px] font-bold text-zinc-500 line-clamp-2">
+                          <span className="text-[0.6875rem] font-bold text-zinc-500 line-clamp-2">
                             {item.title}
                           </span>
                         </div>
@@ -471,7 +483,7 @@ export const VodBrowser: React.FC<VodBrowserProps> = ({
 
                       {/* Locked Badge Overlay */}
                       {locked && (
-                        <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-lg bg-red-600 text-white font-bold text-[9px] flex items-center space-x-1 shadow-md z-10">
+                        <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-lg bg-red-600 text-white font-bold text-[0.625rem] flex items-center space-x-1 shadow-md z-10">
                           <Lock className="w-3 h-3" />
                           <span>LOCKED</span>
                         </div>
@@ -479,8 +491,8 @@ export const VodBrowser: React.FC<VodBrowserProps> = ({
 
                       {/* Rating Badge (Enriched with IMDb logo) */}
                       {ratingVal && !locked && (
-                        <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-lg bg-black/85 backdrop-blur-md flex items-center space-x-1 text-[10px] font-bold border border-white/10 shadow-md">
-                          <span className="px-1 py-0.2 rounded bg-[#f5c518] text-black font-black text-[8px] leading-none">
+                        <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-lg bg-black/85 backdrop-blur-md flex items-center space-x-1 text-[0.6875rem] font-bold border border-white/10 shadow-md">
+                          <span className="px-1 py-0.2 rounded bg-[#f5c518] text-black font-black text-[0.5625rem] leading-none">
                             IMDb
                           </span>
                           <span className="text-amber-400 font-mono font-extrabold">{ratingVal.toFixed(1)}</span>
@@ -490,11 +502,11 @@ export const VodBrowser: React.FC<VodBrowserProps> = ({
                       {/* Type Badge: Series vs 4K Movie */}
                       <div className="absolute bottom-2 left-2 flex items-center space-x-1">
                         {item.type === 'series' ? (
-                          <span className="px-1.5 py-0.5 rounded bg-purple-500/80 text-[9px] font-bold text-white backdrop-blur-md">
+                          <span className="px-1.5 py-0.5 rounded bg-purple-500/80 text-[0.625rem] font-bold text-white backdrop-blur-md">
                             {seasonCount} {seasonCount === 1 ? 'Season' : 'Seasons'}
                           </span>
                         ) : (
-                          <span className="px-1.5 py-0.5 rounded bg-[var(--tv-accent)] text-black text-[9px] font-black">
+                          <span className="px-1.5 py-0.5 rounded bg-[var(--tv-accent)] text-black text-[0.625rem] font-black">
                             4K UHD
                           </span>
                         )}
@@ -524,7 +536,7 @@ export const VodBrowser: React.FC<VodBrowserProps> = ({
                         <h4 className="text-xs font-bold text-white group-hover:text-[var(--tv-accent)] transition-colors truncate">
                           {item.title}
                         </h4>
-                        <div className="flex items-center space-x-1.5 text-[10px] text-zinc-400 mt-0.5">
+                        <div className="flex items-center space-x-1.5 text-[0.6875rem] text-zinc-400 mt-0.5">
                           <span>{item.year || '2024'}</span>
                           <span>•</span>
                           <span className="truncate">{item.genre || 'Entertainment'}</span>
@@ -548,9 +560,9 @@ export const VodBrowser: React.FC<VodBrowserProps> = ({
 
         return (
           <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-fadeIn">
-            <div className="bg-[#121218] border border-white/15 rounded-3xl max-w-4xl w-full max-h-[92vh] overflow-hidden flex flex-col shadow-2xl">
+            <div className="bg-[#121218] border border-white/15 rounded-3xl max-w-[56rem] w-full max-h-[92vh] overflow-hidden flex flex-col shadow-2xl">
               {/* Header with Backdrop */}
-              <div className="relative h-64 sm:h-72 bg-zinc-900 shrink-0">
+              <div className="relative h-[16rem] sm:h-[18rem] bg-zinc-900 shrink-0">
                 {backdropUrl && (
                   <img
                     src={backdropUrl}
@@ -581,7 +593,7 @@ export const VodBrowser: React.FC<VodBrowserProps> = ({
 
                       {/* IMDb Gold Rating Badge */}
                       {displayRating && (
-                        <div className="flex items-center space-x-1.5 px-2 py-0.5 rounded-md bg-[#f5c518] text-black font-black text-[11px] shadow-md">
+                        <div className="flex items-center space-x-1.5 px-2 py-0.5 rounded-md bg-[#f5c518] text-black font-black text-[0.6875rem] shadow-md">
                           <span>IMDb</span>
                           <span className="font-mono">{displayRating.toFixed(1)}/10</span>
                         </div>
@@ -589,7 +601,7 @@ export const VodBrowser: React.FC<VodBrowserProps> = ({
 
                       {/* IMDb Fetching indicator */}
                       {loadingImdb && (
-                        <span className="flex items-center space-x-1 text-amber-300 text-[11px] font-medium bg-amber-500/20 px-2 py-0.5 rounded-md border border-amber-500/30">
+                        <span className="flex items-center space-x-1 text-amber-300 text-[0.6875rem] font-medium bg-amber-500/20 px-2 py-0.5 rounded-md border border-amber-500/30">
                           <Loader2 className="w-3 h-3 animate-spin" />
                           <span>Fetching IMDb...</span>
                         </span>
@@ -643,25 +655,25 @@ export const VodBrowser: React.FC<VodBrowserProps> = ({
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 rounded-2xl bg-white/5 border border-white/10 text-xs">
                     {currentImdb.director && (
                       <div>
-                        <div className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">Director</div>
+                        <div className="text-[0.6875rem] uppercase font-bold text-zinc-400 tracking-wider">Director</div>
                         <div className="font-semibold text-white mt-0.5 truncate">{currentImdb.director}</div>
                       </div>
                     )}
                     {currentImdb.cast && currentImdb.cast.length > 0 && (
                       <div className="sm:col-span-2">
-                        <div className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">Cast</div>
+                        <div className="text-[0.6875rem] uppercase font-bold text-zinc-400 tracking-wider">Cast</div>
                         <div className="font-semibold text-white mt-0.5 truncate">{currentImdb.cast.join(', ')}</div>
                       </div>
                     )}
                     {currentImdb.runtime && (
                       <div>
-                        <div className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">Runtime</div>
+                        <div className="text-[0.6875rem] uppercase font-bold text-zinc-400 tracking-wider">Runtime</div>
                         <div className="font-semibold text-white mt-0.5">{currentImdb.runtime}</div>
                       </div>
                     )}
                     {currentImdb.imdbId && (
                       <div>
-                        <div className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">IMDb ID</div>
+                        <div className="text-[0.6875rem] uppercase font-bold text-zinc-400 tracking-wider">IMDb ID</div>
                         <div className="font-mono font-bold text-amber-400 mt-0.5">{currentImdb.imdbId}</div>
                       </div>
                     )}
@@ -673,7 +685,7 @@ export const VodBrowser: React.FC<VodBrowserProps> = ({
                   <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5 flex items-center space-x-2">
                     <span>Synopsis & Information</span>
                     {currentImdb?.imdbId && (
-                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#f5c518] text-black font-black">
+                      <span className="text-[0.625rem] px-1.5 py-0.2 rounded bg-[#f5c518] text-black font-black">
                         Verified IMDb
                       </span>
                     )}

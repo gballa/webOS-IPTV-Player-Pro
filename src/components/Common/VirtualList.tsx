@@ -3,7 +3,7 @@ import React, { useRef, useState, useEffect } from 'react';
 interface VirtualListProps<T> {
   items: T[];
   itemHeight: number;
-  viewportHeight: number;
+  viewportHeight?: number;
   renderItem: (item: T, index: number, isFocused: boolean) => React.ReactNode;
   focusedIndex?: number;
   overscan?: number;
@@ -15,7 +15,7 @@ interface VirtualListProps<T> {
 export function VirtualList<T>({
   items,
   itemHeight,
-  viewportHeight,
+  viewportHeight: propViewportHeight,
   renderItem,
   focusedIndex = 0,
   overscan = 4,
@@ -25,7 +25,23 @@ export function VirtualList<T>({
 }: VirtualListProps<T>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
+  const [containerHeight, setContainerHeight] = useState<number>(() => propViewportHeight || 600);
 
+  useEffect(() => {
+    const updateSize = () => {
+      if (containerRef.current) {
+        const clientH = containerRef.current.clientHeight;
+        if (clientH > 0) {
+          setContainerHeight(clientH);
+        }
+      }
+    };
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
+
+  const activeViewportHeight = containerHeight || propViewportHeight || 600;
   const totalHeight = items.length * itemHeight;
 
   // Auto-scroll container when focused index changes
@@ -33,15 +49,15 @@ export function VirtualList<T>({
     if (focusedIndex >= 0 && containerRef.current) {
       const targetTop = focusedIndex * itemHeight;
       const currentScroll = containerRef.current.scrollTop;
-      const viewBottom = currentScroll + viewportHeight;
+      const viewBottom = currentScroll + activeViewportHeight;
 
       if (targetTop < currentScroll) {
         containerRef.current.scrollTop = targetTop;
       } else if (targetTop + itemHeight > viewBottom) {
-        containerRef.current.scrollTop = targetTop + itemHeight - viewportHeight;
+        containerRef.current.scrollTop = targetTop + itemHeight - activeViewportHeight;
       }
     }
-  }, [focusedIndex, itemHeight, viewportHeight]);
+  }, [focusedIndex, itemHeight, activeViewportHeight]);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const st = e.currentTarget.scrollTop;
@@ -52,7 +68,7 @@ export function VirtualList<T>({
   };
 
   const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
-  const endIndex = Math.min(items.length - 1, Math.ceil((scrollTop + viewportHeight) / itemHeight) + overscan);
+  const endIndex = Math.min(items.length - 1, Math.ceil((scrollTop + activeViewportHeight) / itemHeight) + overscan);
 
   const visibleItems = [];
   for (let i = startIndex; i <= endIndex; i++) {
@@ -69,8 +85,8 @@ export function VirtualList<T>({
     <div
       ref={containerRef}
       onScroll={handleScroll}
-      className={`overflow-y-auto relative ${className}`}
-      style={{ height: viewportHeight, contain: 'strict' }}
+      className={`overflow-y-auto relative w-full h-full ${className}`}
+      style={{ contain: 'strict' }}
     >
       <div style={{ height: totalHeight, width: '100%', position: 'relative' }}>
         {visibleItems.map(({ item, index, offsetTop }) => {
